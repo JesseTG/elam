@@ -1,0 +1,25 @@
+<html>
+<title>ElAM</title>
+<body>
+<h1>Building The ElAM Libray</h1>
+
+ElAM contains the following directories:
+
+<ul>
+<li>src - contains the sources for the static ElAM library.
+<li>demo - contains the demo program with a simple GUI, it understands only integer logic
+<li>tests - contains test cases
+<li>doc - documentation as HTML pages
+</ul>
+
+<h2>Building</h2>
+
+You need a C++ compiler and Qt 4.x.
+
+In each directory simply call qmake and make (or mingw32-make, or nmake, ...). Start with <tt>src</tt> and continue with <tt>demo</tt> if you want to use the demo program. You will normally not need <tt>tests</tt>, since these are only used for engine internal tests.<p>
+
+To create source documentation call <a href="http://www.doxygen.org">doxygen</a> in the src directory. The documentation will be built in <tt>doc/source/</tt> - open <a href="source/index.html">index.html</a> to browse it.
+
+<h2>Using the library</h2>
+
+Read on <a href="library.html">here</a>.

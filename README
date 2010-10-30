@@ -1,0 +1,29 @@
+README for ElAM
+================
+
+ElAM = Elementary Algebra Machine
+
+(c) Konrad Rosenbaum, 2010
+protected under the GNU LGPL version 3 or at your option any newer
+see COPYING for details
+
+This engine can be fed simple algebraic formulas and will calculate their
+result similar to those used in languages like C or Pascal. It is not able
+to solve algebraic systems or use fancy expressions.
+
+ElAM is based on and made for Qt 4.x.
+
+Building
+=========
+
+see doc/build.html
+
+Syntactic Rules
+================
+
+see doc/syntax.html
+
+Using the Library
+==================
+
+see doc/library.html
