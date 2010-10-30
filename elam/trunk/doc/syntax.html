@@ -1,28 +1,89 @@
 <html>
-<title>ElAM</title>
+<title>ELAM</title>
 <body>
-<h1>The ElAM Syntax</h1>
+<h1>The ELAM Syntax</h1>
 
-ElAM has the following syntactic elements:
+This page uses the example in <tt>demo</tt> to explain syntactic rules. Actual operators, types, and functions may differ significantly when used with different syntax libraries.<p>
+
+ELAM has the following syntactic elements:
 <ul>
 <li>Expressions
+<li>Literals
 <li>Types
 <li>Variables
 <li>Constants
-<li>Parentheses
 <li>Unary and Binary Operators
+<li>Parentheses
 <li>Functions
 <li>Assignments
 </ul>
 
-<h2>Precedence Rules</h2>
+<h2>Expressions</h2>
 
-<h3>Default Operator Precedence</h3>
+Expressions are what ELAM interprets. They can be as simple as the number "1", or very complex:
+
+<table border="1" frame="1">
+<tr><td>Expression<td>Explanation</tr>
+<tr><td>1<td>a simple literal number</tr>
+<tr><td>1+2<td>simple operation using two literals</tr>
+<tr><td>2*a<td>simple operation using a literal and a variable</tr>
+<tr><td>1+2*3<td>two operations with precedence (* is evaluated before +)</tr>
+<tr><td>(1+2)*3<td>two operations with precedence changed through parentheses</tr>
+<tr><td>a=3+4<td>operation with the result assigned to a variable</tr>
+<tr><td>b=a=3+4<td>operation with the result assigned to two variables</tr>
+</table>
+
+Expressions can be used recursively. For example the expression "1+2+3" consists of the two expressions "1+2" and "(1+2)+3". Expressions return the result of their evaluation, assignment expressions return the value that has been stored in the variable to the left.
+
+<h2>Literals</h2>
+
+Literals are directly encoded values like "1" or "0.5".<p>
+
+The default library knows numeric literals:
+<table frame="1" border="1">
+<tr><td>Example<td>Composition<td>Description</tr>
+<tr><td>123<td>starts with 1..9, contains any number of 0..9<td>decimal integer value</tr>
+<tr><td>012<td>starts with 0, contains 0..7<td>octal integer value</tr>
+<tr><td>0x12<td>starts with 0x, contains 0..9 and a..f/A..F<td>hexadecimal integer value</tr>
+<tr><td>1.8, .8, 1. 1e34<td>starts with digit or dot, contains digits, optionally  a dot and/or "e" and more digits<td>floating point value</tr>
+</table><p>
+
+If the string library is loaded you can also formulate strings enclosed in "..." or '...'.
+
+<h2>Types</h2>
+
+ELAM can handle arbitrary value types. The default library brings integer numbers, floating point numbers, and optionally strings. For some functions and operators it can cast values into different types automatically, for others cast-functions must be called.
+
+<h2>Variables and Constants</h2>
+
+Variables are named values (e.g. "a" or "myVar2") that can be set by assignments and then be used instead of literal values. In the default implementation variable names must start with a letter and may contain letters, digits and underscores. Variable names are case sensitive (e.g. "myVar" is different from "MyVar").<p>
+
+Constants are variables that have been marked as immutable, they can be of any type.
+
+<h2>Operators</h2>
+
+There are two types of operators: unary and binary.<p>
+
+Unary operator precede an expression and change it, returning the result. For example the unary "-" operator in the default library negates its numeric argument (e.g. if "a" is 12, then "-a" returns -12).<p>
+
+Binary operators operate on two expressions, one to the left and one to the right of the operator.<p>
+
+If operators follow each other (e.g. "a&nbsp;+|&nbsp;-b") then the operators must be separated by spaces.<p>
+
+Parentheses group operations and may alter the order in which they are executed. Parentheses are evaluated before any other operation.<p>
+
+The equals sign ("=") has a special meaning when used in operators. In the normal mode the direct assignment operator "=" cannot be overloaded with a user specific function. If an operator ends in "=" and there is no overloaded operator, then the remainder is interpreted as a binary operator and the result assigned to the left side of the operator, for example "a+=b" is interpreted as a short form of "a=a+b".
+
+<h3>Operator Precedence</h3>
+
+Operators are interpreted in a specific order of precedence. First the highest precedence operators are evaluated, then the next lower precedence level, etc. with assignments being executed last. Consecutive operations with the same precedence level are executed from left to right.<p>
+
+The default library has the following precedence order:
 
 <table frame="1" border="1">
 <tr><td><b>Operator Class</b><td><b>Operators</b><td><b>Precedence Value</b></tr>
 <tr><td>Parentheses<td>(parentheses), functions(...)<td>100</tr>
-<tr><td>Maximum usable Precedence<td>&nbsp<td>99</tr>
+<tr><td>Maximum usable Precedence<td>&nbsp;<td>99</tr>
 <tr><td>Unary Operators<td> ++, --, ~, !, -, +<td>95</tr>
 <tr><td>Multiplicative<td> *, /, %<td>90</tr>
 <tr><td>Additive<td> +, -<td>80</tr>
@@ -33,8 +94,30 @@ ElAM has the following syntactic elements:
 <tr><td>bitwise OR<td> |<td>40</tr>
 <tr><td>logical AND<td> &amp;&amp;<td>30</tr>
 <tr><td>logical OR<td>||<td>25</tr>
-<tr><td>Lowest usable Precedence<td>&nbsp<td>1</tr>
+<tr><td>Lowest usable Precedence<td>&nbsp;<td>1</tr>
 <tr><td>assignments<td>=, +=, -=, ...<td>0</tr>
+</table><p>
+
+This means for example that in "a=9+1+2*(3-1)" these operations are executed in this order:
+<ol>
+<li>"(3-1)" yields "2"
+<li>"2*2" yields "4"
+<li>"9+1" yields "10"
+<li>"10+4" yields "14"
+<li>the variable "a" is assigned the value "14"
+</ol>
+
+<h2>Functions</h2>
+
+Functions take values of any kind as arguments and return exactly one value. Function names follow the same syntactic rules as variable names. Functions and variables share their namespace - no variable can have the same name as a function. Function arguments are separated by commas.<p>
+
+The default library knows the following functions:
+<table frame="1" border="1">
+<tr><td>Function<td>Description</tr>
+<tr><td>int(value)<td>converts value to integer, rounding towards zero</tr>
+<tr><td>float(value)<td>converts value to a floating point number</tr>
+<tr><td>str(value)<td>converts value to string</tr>
+<tr><td>concat(v1,v2,...)<td>concatenates strings</tr>
 </table>
 
 </html>
