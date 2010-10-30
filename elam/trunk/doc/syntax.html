@@ -1,0 +1,40 @@
+<html>
+<title>ElAM</title>
+<body>
+<h1>The ElAM Syntax</h1>
+
+ElAM has the following syntactic elements:
+<ul>
+<li>Expressions
+<li>Types
+<li>Variables
+<li>Constants
+<li>Parentheses
+<li>Unary and Binary Operators
+<li>Functions
+<li>Assignments
+</ul>
+
+<h2>Precedence Rules</h2>
+
+<h3>Default Operator Precedence</h3>
+
+<table frame="1" border="1">
+<tr><td><b>Operator Class</b><td><b>Operators</b><td><b>Precedence Value</b></tr>
+<tr><td>Parentheses<td>(parentheses), functions(...)<td>100</tr>
+<tr><td>Maximum usable Precedence<td>&nbsp<td>99</tr>
+<tr><td>Unary Operators<td> ++, --, ~, !, -, +<td>95</tr>
+<tr><td>Multiplicative<td> *, /, %<td>90</tr>
+<tr><td>Additive<td> +, -<td>80</tr>
+<tr><td>Shift<td> &lt;&lt;, &gt;&gt;<td>70</tr>
+<tr><td>compare<td> &lt;, &gt;, ==, !=, &lt;=, &gt;=<td>60</tr>
+<tr><td>bitwise AND<td> &amp;<td>50</tr>
+<tr><td>bitwise XOR<td> ^<td>45</tr>
+<tr><td>bitwise OR<td> |<td>40</tr>
+<tr><td>logical AND<td> &amp;&amp;<td>30</tr>
+<tr><td>logical OR<td>||<td>25</tr>
+<tr><td>Lowest usable Precedence<td>&nbsp<td>1</tr>
+<tr><td>assignments<td>=, +=, -=, ...<td>0</tr>
+</table>
+
+</html>
