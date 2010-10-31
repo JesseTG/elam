@@ -4,8 +4,10 @@ README for ELAM
 ELAM = Elementary Logic and Arithmetic Machine
 
 (c) Konrad Rosenbaum, 2010
-protected under the GNU LGPL version 3 or at your option any newer
+protected under the GNU GPL version 3 or at your option any newer
 see COPYING for details
+
+Hint: I really mean GPL, not LGPL. You can't use this library in proprietary code!
 
 This engine can be fed simple arithmetic formulas and will calculate their
 result, similar to those used in languages like C or Pascal. It is not able
@@ -13,17 +15,4 @@ to solve algebraic systems or use fancy expressions.
 
 ELAM is based on and made for Qt 4.x.
 
-Building
-=========
-
-see doc/build.html
-
-Syntactic Rules
-================
-
-see doc/syntax.html
-
-Using the Library
-==================
-
-see doc/library.html
+See the documentation for details. Just point your browser at doc/index.html.

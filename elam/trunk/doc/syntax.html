@@ -82,9 +82,9 @@ The default library has the following precedence order:
 
 <table frame="1" border="1">
 <tr><td><b>Operator Class</b><td><b>Operators</b><td><b>Precedence Value</b></tr>
-<tr><td>Parentheses<td>(parentheses), functions(...)<td>100</tr>
+<tr><td>Parentheses<td>(parentheses), functions(...)<td>1000</tr>
+<tr><td>All Unary Operators<td> ++, --, ~, !, -, +<td>100</tr>
 <tr><td>Maximum usable Precedence<td>&nbsp;<td>99</tr>
-<tr><td>Unary Operators<td> ++, --, ~, !, -, +<td>95</tr>
 <tr><td>Multiplicative<td> *, /, %<td>90</tr>
 <tr><td>Additive<td> +, -<td>80</tr>
 <tr><td>Shift<td> &lt;&lt;, &gt;&gt;<td>70</tr>
@@ -119,5 +119,29 @@ The default library knows the following functions:
 <tr><td>str(value)<td>converts value to string</tr>
 <tr><td>concat(v1,v2,...)<td>concatenates strings</tr>
 </table>
+
+<h2>Character Classes</h2>
+
+There are several classes of characters that make up the language itself: operators, names, special, whitespace, literals, and noise.<p>
+
+The "whitespace" class contains any character that can be ignored. Whitespaces can be used to separate tokens and to adjust expressions for readability. In the default library these are the normal space, the tab chars (\t, \v), and line endings (\n, \r).<p>
+
+The "operators" character class contains all characters that make up operators, in the default library these are "<tt>~!@#$%^&amp;*-+=:&lt;>?/</tt>". Operator class characters can be used to formulate unary and binary operators. This class also contains the assignment operator.<p>
+
+The "names" character class contains all characters that make up variable and function names. In the default library these are English letters (a-z and A-Z), digits (0-9), and underscores (_).<p>
+
+The "operators" and "names" classes must not overlap. While parsing the engine will recognize if the next character in a line is a different class (e.g. "a+b" is equivalent to "a&nbsp;+&nbsp;b"), but inside a class spaces have to be used to separate tokens (e.g. "+-" is different from "+&nbsp;-").<p>
+
+The class of "literals" is comprised of rules that define what a literal looks like. Literals have a start character (which may overlap with the "names" class), a rule how to recognize the end of the literal and a routine to convert it to an actual value. The characters making up a literal can come from any class, although it is recommended to not use any operator characters. The start characters of literals may overlap, in this case they have a built-in precendence in which they are tried out. For example the class of integer numbers in the default library start with digits (0-9) and may contain digits and an optional "x" in second position (as in 0x12), any non-digit ends the literal.<p>
+
+The "special" characters are those with a specific built-in meaning to the parser. In the default library those are:
+<table border="1" frame="1">
+<tr><td>Characters<td>Description<td>Rules</tr>
+<tr><td>Parentheses "(", ")"<td>change the order of evaluation by grouping the inner operations to be performed before the outer operations, or by enclosing the arguments of a function<td>the two parentheses characters must differ and must not match any other class</tr>
+<tr><td>Comma ","<td>separated the arguments of a function<td>single character that must not be contained in any other class</tr>
+<tr><td>Equals "="<td>denotes assignments, the character itself cannot be overridden as operator, combinations with other operators can be overridden<td>one or two characters: prefix and postfix, they must differ, they both must be part of the operator class</tr>
+</table><p>
+
+Any other character falls in the "noise" class and produces a parser error.
 
 </html>
