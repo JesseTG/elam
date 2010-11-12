@@ -15,7 +15,8 @@ HEADERS += \
 	elamvalue.h
 
 SOURCES += \
-	elamvalue.cpp
+	elamvalue.cpp \
+	elamengine.cpp
 
 INCLUDEPATH += .
 DEPENDPATH += .
