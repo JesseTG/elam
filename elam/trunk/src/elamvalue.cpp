@@ -5,91 +5,36 @@
 
 #include "elamvalue.h"
 
-ELAMValue::ELAMValue()
+ELAMException::ELAMException()
 {
-	m_exc=false;
-	m_exline=m_excol=-1;
+	mline=mcol=-1;
 }
-
-ELAMValue::ELAMValue(long long l)
+ELAMException::ELAMException(const ELAMException& e)
 {
-	m_exc=false;
-	m_exline=m_excol=-1;
-	m_val=l;
+	operator=(e);
 }
-
-ELAMValue::ELAMValue(double d)
+ELAMException::ELAMException(ErrorType tp,QString errText, int line, int column)
 {
-	m_exc=false;
-	m_exline=m_excol=-1;
-	m_val=d;
+	mtype=tp;
+	merr=errText;
+	mline=line;
+	mcol=column;
 }
-
-ELAMValue::ELAMValue(QString s)
+static int ELAMException_metaid=qRegisterMetaType<ELAMException>();
+int ELAMException::metaTypeId()
 {
-	m_exc=false;
-	m_exline=m_excol=-1;
-	m_val=s;
+	return ELAMException_metaid;
 }
-
-ELAMValue::ELAMValue(QVariant v)
+ELAMException& ELAMException::operator=(const ELAMException& e)
 {
-	m_exc=false;
-	m_exline=m_excol=-1;
-	//TODO: registered type?
-	m_val=v;
-}
-
-ELAMValue& ELAMValue::operator=(const ELAMValue&e)
-{
-	m_exc=e.m_exc;
-	m_exstr=e.m_exstr;
-	m_exline=e.m_exline;
-	m_excol=e.m_excol;
-	m_val=e.m_val;
+	merr=e.merr;
+	mline=e.mline;
+	mcol=e.mcol;
 	return *this;
 }
 
-ELAMValue& ELAMValue::operator=(long long v)
+static int ELAMAnyType_metaid=qRegisterMetaType<ELAMAnyType>();
+int ELAMAnyType::metaTypeId()
 {
-	m_exc=false;m_excol=m_exline=-1;m_exstr=QString();
-	m_val=v;
-	return *this;
-}
-
-ELAMValue& ELAMValue::operator=(int v)
-{
-	m_exc=false;m_excol=m_exline=-1;m_exstr=QString();
-	m_val=v;
-	return *this;
-}
-
-ELAMValue& ELAMValue::operator=(const QString&v)
-{
-	m_exc=false;m_excol=m_exline=-1;m_exstr=QString();
-	m_val=v;
-	return *this;
-}
-
-ELAMValue& ELAMValue::operator=(const QVariant&v)
-{
-	m_exc=false;m_excol=m_exline=-1;m_exstr=QString();
-	m_val=v;
-	return *this;
-}
-
-
-void ELAMValue::setException(QString s,int l,int c)
-{
-	m_exc=true;
-	m_exline=l;m_excol=c;
-	m_exstr=s;
-}
-
-QPair<int,int> ELAMValue::exceptionPos()const
-{
-	if(m_exc)
-		return QPair<int,int>(m_exline,m_excol);
-	else
-		return QPair<int,int>(-1,-1);
+	return ELAMAnyType_metaid;
 }

@@ -10,37 +10,45 @@
 #include <QString>
 #include <QPair>
 
-class ELAMValue
+/**Objects of this class represent an exception in the evaluation of an ELAM expression.*/
+class ELAMException
 {
 	public:
-		ELAMValue();
-		ELAMValue(long long);
-		ELAMValue(double);
-		ELAMValue(QString);
-		ELAMValue(QVariant);
-		ELAMValue& operator=(const ELAMValue&);
-		ELAMValue& operator=(long long);
-		ELAMValue& operator=(int);
-		ELAMValue& operator=(const QString&);
-		ELAMValue& operator=(const QVariant&);
+		enum ErrorType{
+			NoError=0,
+			ParserError,
+			UnknownOperatorError,
+			UnknownFunctionError,
+			TypeMismatchError,
+		};
 		
-		bool isNull()const{return m_val.isNull();}
+		ELAMException();
+		ELAMException(const ELAMException&);
+		ELAMException(ErrorType type,QString errorText=QString(),int line=-1,int column=-1);
 		
-		void setException(QString,int,int);
+		ELAMException& operator=(const ELAMException&);
 		
-		bool hasException()const{return m_exc;}
-		QString exceptionString()const{return m_exc?m_exstr:QString();}
-		QPair<int,int> exceptionPos()const;
+		QString errorText()const{return merr;}
+		int errorLine()const{return mline;}
+		int errorColumn()const{return mcol;}
+		QPair<int,int> errorPos()const{return QPair<int,int>(mline,mcol);}
 		
-		QVariant toVariant()const{return m_val;}
-		long long toInt()const{return m_val.toInt();}
-		QString toString()const{return m_val.toString();}
+		static int metaTypeId();
 		
 	private:
-		QVariant m_val;
-		bool m_exc;
-		QString m_exstr;
-		int m_exline,m_excol;
+		ErrorType mtype;
+		QString merr;
+		int mline,mcol;
 };
+Q_DECLARE_METATYPE(ELAMException);
+
+/**this type is not actually used, its ID is used as a fallback to tell operators, functions and engines that any supported type can be used*/
+class ELAMAnyType
+{
+	public:
+		///returns the meta type ID of the ANY type
+		static int metaTypeId();
+};
+Q_DECLARE_METATYPE(ELAMAnyType);
 
 #endif
