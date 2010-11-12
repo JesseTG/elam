@@ -9,14 +9,17 @@ RCC_DIR = .ctmp
 
 
 HEADERS += \
+	dptr.h \
 	elam.h \
 	elamengine.h \
 	elamexpression.h \
-	elamvalue.h
+	elamvalue.h \
+	elamintengine.h
 
 SOURCES += \
 	elamvalue.cpp \
-	elamengine.cpp
+	elamengine.cpp \
+	elamintengine.cpp
 
 INCLUDEPATH += .
 DEPENDPATH += .

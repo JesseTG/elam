@@ -12,6 +12,8 @@
 
 #include "elamexpression.h"
 
+#include "dptr.h"
+
 /**pointer to a function wrapping an unary operator
 \param op the operand to be worked on
 \returns the result of the operation*/
@@ -19,13 +21,12 @@ typedef QVariant (*ELAMUnaryOperatorCall)(const QVariant&op);
 
 class ELAMUnaryOperator
 {
+	DECLARE_SHARED_DPTR(ELAMUnaryOperator,d);
 	public:
 		ELAMUnaryOperator(const ELAMUnaryOperator&);
 		ELAMUnaryOperator();
 		~ELAMUnaryOperator();
 		
-		ELAMUnaryOperator& operator=(const ELAMUnaryOperator&);
-
 		/**sets a callback function for the operator and a specific typ
 		\param callback the function to call, if it is null the type is deleted from this operators type list
 		\param type the type of variable to work on, this must be a type registered with QVariant, if this type is already known to the operator its callback is replaced
@@ -55,9 +56,6 @@ class ELAMUnaryOperator
 		
 		///calls the callback function associated with the type of the argument, throws an exception if there is no callback
 		QVariant execute(const QVariant&)const;
-	private:
-		class Private;
-		Private *d;
 };
 
 /**pointer to a function wrapping a binary operator
@@ -65,6 +63,15 @@ class ELAMUnaryOperator
 \param op2 the right operand
 \returns the result of the operation*/
 typedef QVariant (*ELAMBinaryOperatorCall)(const QVariant&op1,const QVariant&op2);
+
+class ELAMBinaryOperator
+{
+	DECLARE_SHARED_DPTR(ELAMBinaryOperator,d);
+	public:
+		ELAMBinaryOperator(const ELAMBinaryOperator&);
+		ELAMBinaryOperator();
+		~ELAMBinaryOperator();
+};
 
 /**pointer to a function wrapping a mathematical function
 \param args the list of arguments
@@ -81,6 +88,7 @@ Methods of this class are used to evaluate expressions into final values.
 class ELAMEngine:public QObject
 {
 	Q_OBJECT
+	DECLARE_DPTR(d);
 	public:
 		///instantiates an engine object
 		ELAMEngine(QObject*parent=0);
@@ -92,11 +100,6 @@ class ELAMEngine:public QObject
 		QVariant evaluate(QString);
 		///evaluates a parsed expression into a final value
 		QVariant evaluate(ELAMExpression);
-		
-		
-	private:
-		class Private;
-		Private *d;
 };
 
 #endif
