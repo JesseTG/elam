@@ -6,6 +6,13 @@
 #include "elamengine.h"
 #include "elamvalue.h"
 
+class DPTR_CLASS_NAME(ELAMEngine)
+{
+	
+};
+
+DEFINE_DPTR(ELAMEngine);
+
 ELAMEngine::ELAMEngine(QObject* parent): QObject(parent)
 {
 
@@ -31,43 +38,27 @@ ELAMExpression ELAMEngine::parseExpression(QString )
 /////////////////////////////////////////////////////////////////
 // Unary Operator
 
-class ELAMUnaryOperator::Private
+class DPTR_CLASS_NAME(ELAMUnaryOperator):public SharedDPtr
 {
 	public:
-		//memory management
-		int ctr;
-		Private(){ctr=1;}
-		void detach(){ctr--;if(ctr<=0)delete this;}
-		void attach(){ctr++;}
-		//callback mapping
 		QMap<int,ELAMUnaryOperatorCall>callmap;
 };
+DEFINE_SHARED_DPTR(ELAMUnaryOperator)
+
 
 ELAMUnaryOperator::ELAMUnaryOperator(const ELAMUnaryOperator& op)
+	:d(op.d)
 {
-	d=0;
-	operator=(op);
 }
 
 ELAMUnaryOperator::ELAMUnaryOperator()
 {
-	d=new Private();
 }
 
 ELAMUnaryOperator::~ELAMUnaryOperator()
 {
-	if(d)d->detach();
-	d=0;
 }
 
-
-ELAMUnaryOperator& ELAMUnaryOperator::operator=(const ELAMUnaryOperator& op)
-{
-	if(d)d->detach();
-	d=op.d;
-	if(d)d->attach();
-	return *this;
-}
 
 QVariant ELAMUnaryOperator::execute(const QVariant& op) const
 {
@@ -142,4 +133,30 @@ void ELAMUnaryOperator::removeCallback(QString t)
 void ELAMUnaryOperator::removeCallback(int t)
 {
 	d->callmap.remove(t);
+}
+
+/////////////////////////////////////////////////////////////////
+// Unary Operator
+
+class DPTR_CLASS_NAME(ELAMBinaryOperator):public SharedDPtr
+{
+	public:
+		QMap<QPair<int,int>,ELAMBinaryOperatorCall>callmap;
+};
+DEFINE_SHARED_DPTR(ELAMBinaryOperator)
+
+
+ELAMBinaryOperator::ELAMBinaryOperator(const ELAMBinaryOperator& op)
+	:d(op.d)
+{
+}
+
+ELAMBinaryOperator::ELAMBinaryOperator()
+{
+
+}
+
+ELAMBinaryOperator::~ELAMBinaryOperator()
+{
+
 }
