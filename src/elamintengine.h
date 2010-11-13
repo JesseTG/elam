@@ -8,12 +8,16 @@
 
 #include "elamengine.h"
 
-class ELAMIntEngine:public ELAMEngine
+namespace ELAM {
+
+class IntEngine:public Engine
 {
 	public:
-		ELAMIntEngine();
+		IntEngine();
 		
-		static void configureIntEngine(ELAMEngine&);
+		static void configureIntEngine(Engine&);
+};
+
 };
 
 #endif

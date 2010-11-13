@@ -1,40 +1,42 @@
-// ELAM value definition implementation
+//  value definition implementation
 //
 // (c) Konrad Rosenbaum, 2010
 // protected under the GNU LGPL v3 or at your option any newer
 
 #include "elamvalue.h"
 
-ELAMException::ELAMException()
+namespace ELAM {
+	
+Exception::Exception()
 {
-	mline=mcol=-1;
 }
-ELAMException::ELAMException(const ELAMException& e)
+Exception::Exception(const Exception& e)
 {
 	operator=(e);
 }
-ELAMException::ELAMException(ErrorType tp,QString errText, int line, int column)
+Exception::Exception(ErrorType tp,QString errText, Position pos)
 {
 	mtype=tp;
 	merr=errText;
-	mline=line;
-	mcol=column;
+	mpos=pos;
 }
-static int ELAMException_metaid=qRegisterMetaType<ELAMException>();
-int ELAMException::metaTypeId()
+static int Exception_metaid=qRegisterMetaType<Exception>();
+int Exception::metaTypeId()
 {
-	return ELAMException_metaid;
+	return Exception_metaid;
 }
-ELAMException& ELAMException::operator=(const ELAMException& e)
+Exception& Exception::operator=(const Exception& e)
 {
 	merr=e.merr;
-	mline=e.mline;
-	mcol=e.mcol;
+	mpos=e.mpos;
 	return *this;
 }
 
-static int ELAMAnyType_metaid=qRegisterMetaType<ELAMAnyType>();
-int ELAMAnyType::metaTypeId()
+static int AnyType_metaid=qRegisterMetaType<AnyType>();
+int AnyType::metaTypeId()
 {
-	return ELAMAnyType_metaid;
+	return AnyType_metaid;
 }
+
+//end of namespace
+};

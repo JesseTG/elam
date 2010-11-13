@@ -9,9 +9,30 @@
 #include <QVariant>
 #include <QString>
 #include <QPair>
+#include <QPoint>
+
+namespace ELAM {
+
+class Position
+{
+	public:
+		Position(const QPair<int,int>&p){mline=p.first;mcol=p.second;}
+		Position(const QPoint &p){mline=p.y();mcol=p.x();}
+		Position(int line,int col){mline=line;mcol=col;}
+		Position(int col){mline=1;mcol=col;}
+		Position(){mline=mcol=-1;}
+		
+		int line()const{return mline;}
+		int column()const{return mcol;}
+		
+		operator QPair<int,int>()const{return QPair<int,int>(mline,mcol);}
+		operator QPoint()const{return QPoint(mcol,mline);}
+	private:
+		int mline,mcol;
+};
 
 /**Objects of this class represent an exception in the evaluation of an ELAM expression.*/
-class ELAMException
+class Exception
 {
 	public:
 		enum ErrorType{
@@ -22,33 +43,37 @@ class ELAMException
 			TypeMismatchError,
 		};
 		
-		ELAMException();
-		ELAMException(const ELAMException&);
-		ELAMException(ErrorType type,QString errorText=QString(),int line=-1,int column=-1);
+		Exception();
+		Exception(const Exception&);
+		Exception(ErrorType type,QString errorText=QString(),Position p=Position());
 		
-		ELAMException& operator=(const ELAMException&);
+		Exception& operator=(const Exception&);
 		
 		QString errorText()const{return merr;}
-		int errorLine()const{return mline;}
-		int errorColumn()const{return mcol;}
-		QPair<int,int> errorPos()const{return QPair<int,int>(mline,mcol);}
+		int errorLine()const{return mpos.line();}
+		int errorColumn()const{return mpos.column();}
+		Position errorPos()const{return mpos;}
 		
 		static int metaTypeId();
 		
 	private:
 		ErrorType mtype;
 		QString merr;
-		int mline,mcol;
+		Position mpos;
 };
-Q_DECLARE_METATYPE(ELAMException);
 
 /**this type is not actually used, its ID is used as a fallback to tell operators, functions and engines that any supported type can be used*/
-class ELAMAnyType
+class AnyType
 {
 	public:
 		///returns the meta type ID of the ANY type
 		static int metaTypeId();
 };
-Q_DECLARE_METATYPE(ELAMAnyType);
+
+//end of namespace
+};
+
+Q_DECLARE_METATYPE(ELAM::Exception);
+Q_DECLARE_METATYPE(ELAM::AnyType);
 
 #endif
