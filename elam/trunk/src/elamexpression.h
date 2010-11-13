@@ -7,26 +7,50 @@
 #define ELAM_EXPRESSION_H
 
 #include "elamvalue.h"
+#include "dptr.h"
 
-class ELAMToken
+namespace ELAM {
+
+class Token
 {
+	DECLARE_DPTR(d)
 	public:
+		///The type of token
 		enum Type {
+			///invalid token
+			Invalid,
+			///a name: function, variable, or constant
 			Name,
+			///an operator (unary or binary)
 			Operator,
+			///opening parenthese
 			ParOpen,
+			///closing parenthese
 			ParClose,
+			///a comma - separating expressions in function calls
 			Comma,
-			Literal
+			///a literal value
+			Literal,
+			///white space chars, this is actually not used for tokens, but for parsing
+			Whitespace,
 		};
-		QString content()const{return mcont;}
-		Type type()const{return mtype;}
-	private:
-		QString mcont;
-		Type mtype;
+		///creates an empty/invalid token
+		Token(Position pos=Position(-1,-1));
+		///creates a token from a parsed piece of string
+		Token(QString,Type,Position pos=Position(-1,-1));
+		///creates a literal token
+		Token(QString,QVariant,Position pos=Position(-1,-1));
+		///returns the string content of the token
+		QString content()const;
+		///returns the type of token this is
+		Type type()const;
+		///for literals: returns the value
+		QVariant literalValue()const;
+		///returns the original position of the token
+		Position position()const;
 };
 
-class ELAMExpression
+class Expression
 {
 	public:
 		enum Type {
@@ -38,6 +62,11 @@ class ELAMExpression
 			UnaryOp,
 			BinaryOp,
 		};
+		Expression(){}
+		Expression(const QList<Token>&){}
+};
+
+//end of namespace
 };
 
 #endif

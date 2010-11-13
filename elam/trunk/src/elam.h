@@ -7,7 +7,6 @@
 #define ELAM_LIB_H
 
 #include "elamengine.h"
-// #include "elamdefault.h"
-// #include "elamfunction.h"
+#include "elamintengine.h"
 
 #endif

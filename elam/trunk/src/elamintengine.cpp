@@ -5,12 +5,12 @@
 
 #include "elamintengine.h"
 
-ELAMIntEngine::ELAMIntEngine()
+ELAM::IntEngine::IntEngine()
 {
 	configureIntEngine(*this);
 }
 
-void ELAMIntEngine::configureIntEngine(ELAMEngine& eng)
+void ELAM::IntEngine::configureIntEngine(ELAM::Engine& eng)
 {
 	//TODO: implement
 }
