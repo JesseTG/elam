@@ -3,21 +3,12 @@
 
 #include <QtCore>
 
-class DPTR_CLASS_NAME(ClassWithDptr)
+class DPTR_CLASS_NAME(ClassWithDptr):public DPtr
 {
 	public:
-		static int cnt;
 		int num;
-		Private(){num=cnt++;qDebug()<<"creates dptr"<<num;}
-		Private(const Private&p){num=p.num;qDebug()<<"copyconst dptr"<<num;}
-		~Private(){qDebug()<<"delete dptr"<<num;}
-		Private& operator=(const Private&p){
-			qDebug()<<"copy dptr"<<p.num<<"onto"<<num;
-			num=p.num;
-			return *this;
-		}
+		Private(){num=0;}
 };
-int ClassWithDptr::Private::cnt=0;
 DEFINE_DPTR(ClassWithDptr)
 
 
@@ -25,25 +16,20 @@ QString ClassWithDptr::toString()const
 {
 	return QString("class with dptr %1").arg(d->num);
 }
+int ClassWithDptr::num()const{return d->num;}
+void ClassWithDptr::setNum(int n){d->num=n;}
 
 class DPTR_CLASS_NAME(ClassWithSDptr):public SharedDPtr
 {
 	public:
-		static int cnt;
 		int num;
-		Private(){num=cnt++;qDebug()<<"creates dptr"<<num;}
-		Private(const Private&p){num=p.num;qDebug()<<"copyconst dptr"<<num;}
-		~Private(){qDebug()<<"delete dptr"<<num;}
-		Private& operator=(const Private&p){
-			qDebug()<<"copy dptr"<<p.num<<"onto"<<num;
-			num=p.num;
-			return *this;
-		}
+		Private(){num=0;}
 };
-int ClassWithSDptr::Private::cnt=0;
 DEFINE_SHARED_DPTR(ClassWithSDptr)
 
 QString ClassWithSDptr::toString()const
 {
 	return QString("class with shared dptr %1").arg(d->num);
 }
+int ClassWithSDptr::num()const{return d->num;}
+void ClassWithSDptr::setNum(int n){d->num=n;}

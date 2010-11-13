@@ -7,6 +7,8 @@ class ClassWithDptr
 	DECLARE_DPTR(d)
 	public:
 		QString toString()const;
+		int num()const;
+		void setNum(int);
 };
 
 class ClassWithSDptr
@@ -14,6 +16,8 @@ class ClassWithSDptr
 	DECLARE_SHARED_DPTR(d)
 	public:
 		QString toString()const;
+		int num()const;
+		void setNum(int);
 };
 
 
