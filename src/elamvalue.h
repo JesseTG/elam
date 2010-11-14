@@ -13,23 +13,46 @@
 
 namespace ELAM {
 
+/** \brief A character position inside a text/string that is being evaluated.
+
+A position consists of line and column. The top left position in a text is assumed to be line 1 column 1. Any position with line and/or column less than zero is considered invalid.
+
+This class is completely inline and as such should be quite fast.*/
 class Position
 {
 	public:
-		Position(const QPair<int,int>&p){mline=p.first;mcol=p.second;}
-		Position(const QPoint &p){mline=p.y();mcol=p.x();}
-		Position(int line,int col){mline=line;mcol=col;}
-		Position(int col){mline=1;mcol=col;}
-		Position(){mline=mcol=-1;}
+		///converts a pair of ints to a position
+		inline Position(const QPair<int,int>&p){mline=p.first;mcol=p.second;}
+		///converts a QPoint to a position - x is interpreted as column, y as line
+		inline Position(const QPoint &p){mline=p.y();mcol=p.x();}
+		///instantiates a position from line and column
+		inline Position(int line,int col){mline=line;mcol=col;}
+		///instantiates a position from column only, line is assumed to be "1"
+		inline Position(int col){mline=1;mcol=col;}
+		///instantiates an invalid position
+		inline Position(){mline=mcol=-1;}
+		///copy constructor
+		inline Position(const Position&p){mline=p.mline;mcol=p.mcol;}
 		
-		int line()const{return mline;}
-		int column()const{return mcol;}
+		///copies a position
+		inline Position& operator=(const Position&p){mline=p.mline;mcol=p.mcol;return *this;}
 		
-		operator QPair<int,int>()const{return QPair<int,int>(mline,mcol);}
-		operator QPoint()const{return QPoint(mcol,mline);}
+		///returns the line of this position or -1 if the position is invalid
+		inline int line()const{if(mcol>=0)return mline;else return -1;}
+		///returns the column of this position or -1 if the position is invalid
+		inline int column()const{if(mline>=0)return mcol;else return -1;}
+		
+		///true if this position is valid
+		inline bool isValid()const{return mline>=0 && mcol >=0;}
+		
+		///transparently converts to a pair of ints
+		inline operator QPair<int,int>()const{return QPair<int,int>(mline,mcol);}
+		///transparently converts to a QPoint, with x=column and y=line
+		inline operator QPoint()const{return QPoint(mcol,mline);}
 	private:
 		int mline,mcol;
 };
+QDebug&operator<<(QDebug&,const Position&);
 
 /**Objects of this class represent an exception in the evaluation of an ELAM expression.*/
 class Exception

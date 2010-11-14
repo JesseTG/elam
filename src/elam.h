@@ -9,4 +9,12 @@
 #include "elamengine.h"
 #include "elamintengine.h"
 
+/** \mainpage ELAM - Elementary Logic and Arithmetic Machine
+
+Please see the <a href="../index.html">main docu</a> for build instructions and a tutorial on how to use ELAM.<p>
+
+See the ELAM namespace for member documentation.
+
+*/
+
 #endif
