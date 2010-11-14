@@ -5,6 +5,8 @@
 
 #include "elamvalue.h"
 
+#include<QDebug>
+
 namespace ELAM {
 	
 Exception::Exception()
@@ -20,6 +22,7 @@ Exception::Exception(ErrorType tp,QString errText, Position pos)
 	merr=errText;
 	mpos=pos;
 }
+
 static int Exception_metaid=qRegisterMetaType<Exception>();
 int Exception::metaTypeId()
 {
@@ -37,6 +40,14 @@ int AnyType::metaTypeId()
 {
 	return AnyType_metaid;
 }
+
+QDebug& operator<< ( QDebug& dbg, const ELAM::Position& pos)
+{
+	if(!pos.isValid())dbg.nospace()<<"Position(invalid)";
+	else dbg.nospace()<<"Position(line="<<pos.line()<<",col="<<pos.column()<<")";
+	return dbg.space();
+}
+
 
 //end of namespace
 };

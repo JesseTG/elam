@@ -6,6 +6,8 @@
 #include "elamengine.h"
 #include "elamvalue.h"
 
+#include <QDebug>
+
 namespace ELAM {
 ///////////////////////////////////////////////////////////////////////////////
 // Engine
@@ -14,6 +16,18 @@ class DPTR_CLASS_NAME(Engine):public DPtr
 {
 	public:
 		CharacterClassSettings cclass;
+		QMap<QString,QVariant> vars,consts;
+		QMap<QString,Function> funcs;
+		struct LiteralParser_s
+		{
+			LiteralParser parser;
+			QString start;
+			int prio;
+			//this operator is reversed, so that highest prio is in element 0 after qSort
+			bool operator<(const LiteralParser_s&l2)const
+			{return prio>l2.prio;}
+		};
+		QList<LiteralParser_s>parsers;
 };
 DEFINE_DPTR(Engine);
 
@@ -47,37 +61,217 @@ Expression Engine::expression(QList< Token > )
 
 QList< Token > Engine::tokenize(QString ex)
 {
+	//presets
 	Token::Type ctype=Token::Invalid;
 	QString ctok;
 	QList<Token> ret;
 	int cline=1,ccol=0;
 	int sline=cline,scol=ccol;
+	int litend=-1;
+	//go through expression
 	for(int i=0;i<ex.size();i++){
 		if(ex[i]=='\n'){cline++;ccol=0;}
 		ccol++;
-		//if we have a type: check that we are still in it
+		//skip everything till end of a literal
+		if(litend>i)continue;
+		//get type of current character
 		Token::Type ntype=d->cclass.charType(ex[i],ctype);
 		//check for invalid stuff
 		if(ntype==Token::Invalid)
-			return QList<Token>()<<Token(Position(sline,scol));
+			return QList<Token>()<<Token(Position(cline,ccol));
 		//check whether we are still inside the same token
 		if(ntype==ctype)
 			ctok+=ex[i];
 		else{
-			if(ctype!=Token::Invalid)
+			//store old token
+			if(ctype!=Token::Invalid && ctype!=Token::Whitespace && ctok!="")
 				ret<<Token(ctok,ctype,Position(sline,scol));
-			ctype=ntype;
+			//reset state
 			ctok.clear();
 			sline=cline;
 			scol=ccol;
+			//handle current char
+			switch(ntype){
+				case Token::ParOpen:
+				case Token::ParClose:
+				case Token::Comma:
+					//special chars
+					ret<<Token(QString(ex[i]),ntype,Position(cline,ccol));
+					ctype=Token::Invalid;
+					break;
+				case Token::Whitespace:
+				case Token::Operator:
+				case Token::Name:
+					//start new token
+					ctype=ntype;
+					ctok+=ex[i];
+					break;
+				case Token::Literal:{
+					//parse it
+					QPair<QString,QVariant>lt=parseLiteral(ex,i);
+					//check for failure
+					if(lt.first=="")
+						return QList<Token>()<<Token(Position(cline,ccol));
+					//store token
+					ret<<Token(lt.first,lt.second,Position(cline,ccol));
+					//make the loop skip the rest
+					litend=i+lt.first.size();
+					ctype=Token::Invalid;
+					break;}
+				default://nothing
+					qDebug()<<"oops. unexpected token type at line"<<cline<<"col"<<ccol;
+					ctype=Token::Invalid;
+					break;
+			}
 		}
 	}
+	//add remaining stuff
+	if(ctype!=Token::Invalid && ctype!=Token::Whitespace && ctok!="")
+		ret<<Token(ctok,ctype,Position(sline,scol));
 	return ret;
 }
 
 CharacterClassSettings Engine::characterClasses()
 {
 	return d->cclass;
+}
+
+QVariant Engine::getConstant(QString n) const
+{
+	if(d->consts.contains(n))return d->consts[n];
+	return QVariant();
+}
+
+QVariant Engine::getVariable(QString n) const
+{
+	if(d->vars.contains(n))return d->vars[n];
+	return QVariant();
+}
+
+QVariant Engine::getValue(QString n) const
+{
+	if(d->consts.contains(n))return d->consts[n];
+	if(d->vars.contains(n))return d->vars[n];
+	return QVariant();
+}
+
+bool Engine::hasConstant(QString n) const
+{
+	return d->consts.contains(n);
+}
+
+bool Engine::hasVariable(QString n) const
+{
+	return d->vars.contains(n);
+}
+
+bool Engine::hasValue(QString n) const
+{
+	return d->vars.contains(n) || d->consts.contains(n);
+}
+
+void Engine::removeConstant(QString n)
+{
+	d->consts.remove(n);
+}
+
+void Engine::removeVariable(QString n)
+{
+	d->vars.remove(n);
+}
+
+void Engine::removeValue(QString n)
+{
+	d->consts.remove(n);
+	d->vars.remove(n);
+}
+
+bool Engine::setConstant(QString n, QVariant v)
+{
+	if(!d->cclass.isName(n))return false;
+	if(d->funcs.contains(n))return false;
+	d->vars.remove(n);
+	d->consts.insert(n,v);
+	return true;
+}
+
+bool Engine::setVariable(QString n, QVariant v)
+{
+	if(!d->cclass.isName(n))return false;
+	if(d->consts.contains(n))return false;
+	if(d->funcs.contains(n))return false;
+	d->vars.insert(n,v);
+	return true;
+}
+
+bool Engine::hasFunction(QString n) const
+{
+	return d->funcs.contains(n);
+}
+
+Function Engine::getFunction(QString n) const
+{
+	if(d->funcs.contains(n))return d->funcs[n];
+	return 0;
+}
+
+bool Engine::setFunction(QString n, ELAM::Function p)
+{
+	if(p==0)return false;
+	if(!d->cclass.isName(n))return false;
+	if(d->consts.contains(n))return false;
+	if(d->vars.contains(n))return false;
+	d->funcs.insert(n,p);
+	return true;
+}
+
+void Engine::removeFunction(QString n)
+{
+	d->funcs.remove(n);
+}
+
+bool Engine::setLiteralParser ( ELAM::LiteralParser parser, QString startchars, int prio )
+{
+	if(parser==0 || startchars=="" || prio<0 || prio>100)
+		return false;
+	for(int i=0;i<d->parsers.size();i++){
+		if(d->parsers[i].parser==parser){
+			d->parsers[i].start=startchars;
+			d->parsers[i].prio=prio;
+			return true;
+		}
+	}
+	Private::LiteralParser_s s;
+	s.parser=parser;
+	s.prio=prio;
+	s.start=startchars;
+	d->parsers<<s;
+	return true;
+}
+
+void Engine::removeLiteralParser ( ELAM::LiteralParser parser )
+{
+	for(int i=0;i<d->parsers.size();i++)
+		if(d->parsers[i].parser==parser){
+			d->parsers.removeAt(i);
+			return;
+		}
+}
+
+QPair< QString, QVariant > Engine::parseLiteral ( QString ex, int start)
+{
+	QChar sc=ex[start];
+	//find any parser that matches the start char
+	QList<Private::LiteralParser_s>cand;
+	for(int i=0;i<d->parsers.size();i++)
+		if(d->parsers[i].start.contains(sc))
+			cand<<d->parsers[i];
+	if(cand.size()<1)
+		return QPair<QString,QVariant>();
+	//sort them
+	qSort(cand);
+	//execute
+	return cand[0].parser(ex,*this,start);
 }
 
 
@@ -214,6 +408,9 @@ bool CharacterClassSettings::isConsistent() const
 		return false;
 	if(d->assignmentChars.second!=0 && !d->operatorClass.contains(d->assignmentChars.second))
 		return false;
+	//check parentheses are different
+	if(d->parenthesesChars.first==d->parenthesesChars.second)
+		return false;
 	//check remaining special chars are not in any other class
 	any+=d->operatorClass;
 	if(any.contains(d->parenthesesChars.first) ||
@@ -221,6 +418,78 @@ bool CharacterClassSettings::isConsistent() const
 	   any.contains(d->commaChar))
 		return false;
 	//all ok
+	return true;
+}
+
+Token::Type CharacterClassSettings::charType(QChar c, ELAM::Token::Type otype) const
+{
+	//special char?
+	if(c==d->parenthesesChars.first)return Token::ParOpen;
+	if(c==d->parenthesesChars.second)return Token::ParClose;
+	if(c==d->commaChar)return Token::Comma;
+	//is it a name?
+	if(otype==Token::Name){
+		//is this a continuation
+		if(d->nameClass.second.contains(c))return Token::Name;
+	}else{
+		//is this the start of a name
+		if(d->nameClass.first.contains(c))return Token::Name;
+	}
+	//is it the start of a literal?
+	if(d->literalClass.contains(c))return Token::Literal;
+	//operator?
+	if(d->operatorClass.contains(c))return Token::Operator;
+	//whitespace?
+	if(d->whitespaceClass.contains(c))return Token::Whitespace;
+	//must be invalid noise
+	return Token::Invalid;
+}
+
+bool CharacterClassSettings::isAssignment(QString op)const
+{
+	//sanity checks: size
+	if(op.size()<1)return false;
+	if(d->assignmentChars.first!=0 && d->assignmentChars.second!=0)
+		if(op.size()<2)return false;
+	//check we have assignments at all
+	if(d->assignmentChars.first==0 && d->assignmentChars.second==0)return false;
+	//check it is assignment
+	if(d->assignmentChars.first!=0 && op[0]!=d->assignmentChars.first)
+		return false;
+	if(d->assignmentChars.second!=0 && op[op.size()-1]!=d->assignmentChars.second)
+		return false;
+	//check it is an operator
+	for(int i=0;i<op.size();i++)
+		if(!d->operatorClass.contains(op[i]))
+			return false;
+	//passed everything
+	return true;
+}
+
+bool CharacterClassSettings::isSimpleAssignment ( QString op) const
+{
+	if(op.size()<1)return false;
+	QString c;
+	if(d->assignmentChars.first!=0)c+=d->assignmentChars.first;
+	if(d->assignmentChars.second!=0)c+=d->assignmentChars.second;
+	return op==c;
+}
+
+
+bool CharacterClassSettings::isName(QString n) const
+{
+	if(n.size()<1)return false;
+	if(!d->nameClass.first.contains(n[0]))return false;
+	for(int i=0;i<n.size();i++)
+		if(!d->nameClass.second.contains(n[i]))return false;
+	return true;
+}
+
+bool CharacterClassSettings::isOperator(QString op) const
+{
+	for(int i=0;i<op.size();i++)
+		if(!d->operatorClass.contains(op[i]))
+			return false;
 	return true;
 }
 
@@ -240,6 +509,13 @@ UnaryOperator::UnaryOperator(const UnaryOperator& op)
 	:d(op.d)
 {
 }
+
+UnaryOperator& UnaryOperator::UnaryOperator::operator=(const ELAM::UnaryOperator& op)
+{
+	d=op.d;
+	return *this;
+}
+
 
 UnaryOperator::UnaryOperator()
 {

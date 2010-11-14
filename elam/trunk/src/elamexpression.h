@@ -11,6 +11,9 @@
 
 namespace ELAM {
 
+/**Represents a single token in a parsed expression.
+
+Tokens are pretty stupid themselves - they just know their type, position, their original piece of text and an optional value (literals). They are used by the engine and expressions to transform text into executable expressions.*/
 class Token
 {
 	DECLARE_DPTR(d)
@@ -49,6 +52,8 @@ class Token
 		///returns the original position of the token
 		Position position()const;
 };
+
+QDebug& operator<<(QDebug&,const Token&);
 
 class Expression
 {
