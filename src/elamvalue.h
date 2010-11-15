@@ -58,25 +58,55 @@ QDebug&operator<<(QDebug&,const Position&);
 class Exception
 {
 	public:
+		///Type of Exception
 		enum ErrorType{
+			///not an exception
 			NoError=0,
+			///error while parsing the expression
 			ParserError,
+			///the operator is not known
 			UnknownOperatorError,
+			///the function is not known
 			UnknownFunctionError,
+			///the operator or function is known, but the type of one of the arguments is not supported
 			TypeMismatchError,
+			///the amount of arguments to a function is wrong or the syntax of arguments
+			ArgumentListError,
+			///the operation itself failed, e.g. division by zero
+			OperationError,
 		};
 		
-		Exception();
+		///instantiates a copy of an exception
 		Exception(const Exception&);
-		Exception(ErrorType type,QString errorText=QString(),Position p=Position());
+		/**instantiates an exception
+		\param type the type of exception
+		\param errorText some human readable text describing the problem
+		\param pos the position in the original expression string where the problem occurred*/
+		Exception(ErrorType type=NoError,QString errorText=QString(),Position pos=Position());
+		/**instantiates an exception
+		\param type the type of exception
+		\param errorText some human readable text describing the problem
+		\param pos the position in the original expression string where the problem occurred*/
+		Exception(ErrorType type,Position pos,QString errorText=QString());
 		
+		///copies an exception
 		Exception& operator=(const Exception&);
 		
+		///returns the describing text of the exception (if existing)
 		QString errorText()const{return merr;}
-		int errorLine()const{return mpos.line();}
-		int errorColumn()const{return mpos.column();}
+		///type of error represented by the exception
+		ErrorType errorType()const{return mtype;}
+		///the position in the original expression where the error originated
 		Position errorPos()const{return mpos;}
+		///the line in the original expression where the error originated
+		int errorLine()const{return mpos.line();}
+		///the column in the original expression where the error originated
+		int errorColumn()const{return mpos.column();}
 		
+		///converts the exception to a variant
+		operator QVariant()const{return QVariant::fromValue<Exception>(*this);}
+		
+		///the meta type ID (used with QVariant) of the exception type
 		static int metaTypeId();
 		
 	private:
