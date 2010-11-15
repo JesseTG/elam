@@ -70,7 +70,8 @@ void ElamTest::charClass()
 void ElamTest::tokenizer()
 {
 	IntEngine ie;
-	QString ex="a= bcd +345*efg*(65/(5))";
+	FloatEngine::configureFloatEngine(ie);
+	QString ex="a= bcd +345*efg*(65.3/(5))";
 	QList<Token> tl=ie.tokenize(ex);
 	/*qDebug()<<"expression:"<<ex<<"tokens:"<<tl.size();
 	for(int i=0;i<tl.size();i++)
@@ -83,11 +84,13 @@ void ElamTest::tokenizer()
 	QCOMPARE(tl[4].type(),Token::Literal);//345
 	QCOMPARE(tl[4].literalValue().toInt(),345);//345
 	QCOMPARE(tl[4].literalValue().typeName(),"qlonglong");//345
+	QCOMPARE(tl[4].literalValue().type(),QVariant::LongLong);//345
 	QCOMPARE(tl[5].type(),Token::Operator);//*
 	QCOMPARE(tl[6].type(),Token::Name);//efg
 	QCOMPARE(tl[7].type(),Token::Operator);//*
 	QCOMPARE(tl[8].type(),Token::ParOpen);//(
-	QCOMPARE(tl[9].type(),Token::Literal);//65
+	QCOMPARE(tl[9].type(),Token::Literal);//65.3
+	QCOMPARE(tl[9].literalValue().type(),QVariant::Double);
 	QCOMPARE(tl[10].type(),Token::Operator);// /
 	QCOMPARE(tl[11].type(),Token::ParOpen);//(
 	QCOMPARE(tl[12].type(),Token::Literal);//5

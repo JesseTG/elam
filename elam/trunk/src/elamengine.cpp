@@ -28,6 +28,8 @@ class DPTR_CLASS_NAME(Engine):public DPtr
 			{return prio>l2.prio;}
 		};
 		QList<LiteralParser_s>parsers;
+		QMap<QString,UnaryOperator>unary;
+		QMap<QString,BinaryOperator>binary;
 };
 DEFINE_DPTR(Engine);
 
@@ -232,8 +234,10 @@ void Engine::removeFunction(QString n)
 
 bool Engine::setLiteralParser ( ELAM::LiteralParser parser, QString startchars, int prio )
 {
+	//base check
 	if(parser==0 || startchars=="" || prio<0 || prio>100)
 		return false;
+	//search for existing entry
 	for(int i=0;i<d->parsers.size();i++){
 		if(d->parsers[i].parser==parser){
 			d->parsers[i].start=startchars;
@@ -241,6 +245,7 @@ bool Engine::setLiteralParser ( ELAM::LiteralParser parser, QString startchars, 
 			return true;
 		}
 	}
+	//none found: create new entry
 	Private::LiteralParser_s s;
 	s.parser=parser;
 	s.prio=prio;
@@ -272,12 +277,26 @@ QPair< QString, QVariant > Engine::parseLiteral ( QString ex, int start)
 	qSort(cand);
 	//execute
 	for(int i=0;i<cand.size();i++){
-		QPair< QString, QVariant >r=cand[0].parser(ex,*this,start);
+		QPair< QString, QVariant >r=cand[i].parser(ex,*this,start);
 		if(r.first.size()>0)
 			return r;
 	}
 	//failure
 	return QPair< QString, QVariant >();
+}
+
+BinaryOperator Engine::binaryOperator ( QString name )
+{
+	if(!d->binary.contains(name))
+		d->binary.insert(name,BinaryOperator());
+	return d->binary[name];
+}
+
+UnaryOperator Engine::unaryOperator ( QString name )
+{
+	if(!d->unary.contains(name))
+		d->unary.insert(name,UnaryOperator());
+	return d->unary[name];
 }
 
 
@@ -623,15 +642,75 @@ BinaryOperator::BinaryOperator(const BinaryOperator& op)
 {
 }
 
+BinaryOperator& BinaryOperator::operator= ( const ELAM::BinaryOperator& op )
+{
+	d=op.d;
+	return *this;
+}
+
+
 BinaryOperator::BinaryOperator()
 {
-
 }
 
 BinaryOperator::~BinaryOperator()
 {
+}
+
+QVariant BinaryOperator::execute ( const QVariant&op1,const QVariant&op2 ) const
+{
+	//TODO: implement
+	return QVariant();
+}
+
+BinaryOperatorCall BinaryOperator::getCallback ( QString type1, QString type2 ) const
+{
+	//TODO: implement
+	return 0;
+}
+
+BinaryOperatorCall BinaryOperator::getCallback ( int type1, int type2 ) const
+{
+	//TODO: implement
+	return 0;
+}
+
+QList< QPair< int, int > > BinaryOperator::getTypeIds() const
+{
+	//TODO: implement
+	return QList< QPair< int, int > > ();
+}
+QList< QPair< QString, QString > > BinaryOperator::getTypeNames() const
+{
+	//TODO: implement
+	return QList< QPair< QString, QString > >();
+}
+void BinaryOperator::removeCallback ( BinaryOperatorCall )
+{
+	//TODO: implement
 
 }
+void BinaryOperator::removeCallback ( QString , QString )
+{
+	//TODO: implement
+
+}
+void BinaryOperator::removeCallback ( int , int )
+{
+	//TODO: implement
+
+}
+void BinaryOperator::setCallback ( BinaryOperatorCall callback, QString type1, QString type2 )
+{
+	//TODO: implement
+
+}
+void BinaryOperator::setCallback ( BinaryOperatorCall callback, int type1, int type2 )
+{
+	//TODO: implement
+
+}
+
 
 
 //end of namespace

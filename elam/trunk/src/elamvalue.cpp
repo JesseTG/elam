@@ -9,9 +9,6 @@
 
 namespace ELAM {
 	
-Exception::Exception()
-{
-}
 Exception::Exception(const Exception& e)
 {
 	operator=(e);
@@ -30,6 +27,7 @@ int Exception::metaTypeId()
 }
 Exception& Exception::operator=(const Exception& e)
 {
+	mtype=e.mtype;
 	merr=e.merr;
 	mpos=e.mpos;
 	return *this;

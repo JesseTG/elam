@@ -14,13 +14,15 @@ HEADERS += \
 	elamengine.h \
 	elamexpression.h \
 	elamvalue.h \
-	elamintengine.h
+	elamintengine.h \
+	elamfloatengine.h
 
 SOURCES += \
 	elamvalue.cpp \
 	elamengine.cpp \
 	elamintengine.cpp \
-	elamexpression.cpp
+	elamexpression.cpp \
+	elamfloatengine.cpp
 
 INCLUDEPATH += .
 DEPENDPATH += .

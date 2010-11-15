@@ -88,6 +88,38 @@ class BinaryOperator
 		BinaryOperator(const BinaryOperator&);
 		BinaryOperator();
 		~BinaryOperator();
+		/**the operator becomes a shared copy of op and abandones its old link*/
+		BinaryOperator& operator=(const BinaryOperator&op);
+		
+		/**sets a callback function for the operator and a specific typ
+		\param callback the function to call, if it is null the type is deleted from this operators type list
+		\param type the type of variable to work on, this must be a type registered with QVariant, if this type is already known to the operator its callback is replaced
+		*/
+		void setCallback(BinaryOperatorCall callback,QString type1,QString type2);
+		/**sets a callback function for the operator and a specific typ
+		\param callback the function to call, if it is null the type is deleted from this operators type list
+		\param type the type of variable to work on, this must be a type registered with QVariant, if this type is already known to the operator its callback is replaced
+		*/
+		void setCallback(BinaryOperatorCall callback,int type1,int type2);
+		/**returns the callback function attached to the type or NULL if there is none*/
+		BinaryOperatorCall getCallback(QString type1,QString type2)const;
+		/**returns the callback function attached to the type or NULL if there is none*/
+		BinaryOperatorCall getCallback(int type1,int type2)const;
+		
+		/**removes all types attached to this callback from the operator*/
+		void removeCallback(BinaryOperatorCall);
+		///removes the type from this operators list
+		void removeCallback(QString,QString);
+		///removes the type from this operators list
+		void removeCallback(int,int);
+		
+		///returns all combinations of type names that have a valid callback in this operator
+		QList<QPair<QString,QString> > getTypeNames()const;
+		///returns all combinations of type IDs that have a valid callback in this operator
+		QList<QPair<int,int> > getTypeIds()const;
+		
+		///calls the callback function associated with the type of the argument, throws an exception if there is no callback
+		QVariant execute(const QVariant&,const QVariant&)const;
 };
 
 /**pointer to a function wrapping a mathematical function
@@ -311,7 +343,7 @@ class Engine:public QObject
 
 		/**sets the parser routine for a literal value
 		\param parser pointer to the parser routine
-		\param startchars characters that the literal can start with, all of those characters must be part of the literalStart class
+		\param startchars characters that the literal can start with, at least some of those characters must be part of the literalStart class, the ones which are not part of it will be ignored when recognizing a literal - if none are part of the class the literal cannot be used until the class changes
 		\param prio a value between 0 and 100, parsers with higher values are preferred over those with lower values if they share a start character
 		\returns true if the parser is (re-)registered successfully, or false if:
 		 - the parser is null
@@ -323,6 +355,14 @@ class Engine:public QObject
 		bool setLiteralParser(LiteralParser parser,QString startchars,int prio=50);
 		///removes a parser function
 		void removeLiteralParser(LiteralParser parser);
+		
+		/** \brief returns an existing or new unary operator object
+		\param name the name token of the operator, if the name is not a valid operator it cannot be called from this engine until character classes change*/
+		UnaryOperator unaryOperator(QString name);
+		
+		/** \brief returns an existing or new binary operator object
+		\param name the name token of the operator, if the name is not a valid operator it cannot be called from this engine until character classes change*/
+		BinaryOperator binaryOperator(QString name);
 	public slots:
 		///simply parses an expression string into an  object
 		Expression expression(QString);
