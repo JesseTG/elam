@@ -18,6 +18,7 @@ DEFINE_DPTR(Token)
 Token::Token(Position pos)
 {
 	d->pos=pos;
+	d->type=Invalid;
 }
 
 Token::Token(QString c,Token::Type t,Position pos)
@@ -32,6 +33,7 @@ Token::Token(QString c,QVariant v,Position pos)
 	d->cont=c;
 	d->val=v;
 	d->pos=pos;
+	d->type=Literal;
 }
 
 QString Token::content()const{return d->cont;}
@@ -46,8 +48,8 @@ QDebug&operator<<(QDebug&dbg,const Token&tok)
 		case Token::Invalid:dbg<<"Invalid";break;
 		case Token::Name:dbg<<"Name";break;
 		case Token::Operator:dbg<<"Operator";break;
-		case Token::ParClose:dbg<<"OpeningParenthesis";break;
-		case Token::ParOpen:dbg<<"ClosingParenthesis";break;
+		case Token::ParClose:dbg<<"ClosingParenthesis";break;
+		case Token::ParOpen:dbg<<"OpeningParenthesis";break;
 		case Token::Comma:dbg<<"Comma";break;
 		case Token::Literal:dbg<<"LiteralValue"<<",value="<<tok.literalValue();break;
 		case Token::Whitespace:dbg<<"WhiteSpace";break;

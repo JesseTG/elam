@@ -1,9 +1,9 @@
 TEMPLATE = app
 TARGET = parsertest
 QT -= gui
-CONFIG += qtestlib debug
+CONFIG += qtestlib debug link_prl
 INCLUDEPATH += . ../../src
-DEPENDPATH += $$INCLUDEPATH
+DEPENDPATH += $$INCLUDEPATH ../..
 LIBS += -L../.. -lelam
 
 SOURCES += parser.cpp
