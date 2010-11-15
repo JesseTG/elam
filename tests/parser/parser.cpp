@@ -76,6 +76,23 @@ void ElamTest::tokenizer()
 	for(int i=0;i<tl.size();i++)
 		qDebug()<<" token"<<i<<tl[i];*/
 	QCOMPARE(tl.size(),15);
+	QCOMPARE(tl[0].type(),Token::Name);//a
+	QCOMPARE(tl[1].type(),Token::Operator);//=
+	QCOMPARE(tl[2].type(),Token::Name);//bcd
+	QCOMPARE(tl[3].type(),Token::Operator);//+
+	QCOMPARE(tl[4].type(),Token::Literal);//345
+	QCOMPARE(tl[4].literalValue().toInt(),345);//345
+	QCOMPARE(tl[4].literalValue().typeName(),"qlonglong");//345
+	QCOMPARE(tl[5].type(),Token::Operator);//*
+	QCOMPARE(tl[6].type(),Token::Name);//efg
+	QCOMPARE(tl[7].type(),Token::Operator);//*
+	QCOMPARE(tl[8].type(),Token::ParOpen);//(
+	QCOMPARE(tl[9].type(),Token::Literal);//65
+	QCOMPARE(tl[10].type(),Token::Operator);// /
+	QCOMPARE(tl[11].type(),Token::ParOpen);//(
+	QCOMPARE(tl[12].type(),Token::Literal);//5
+	QCOMPARE(tl[13].type(),Token::ParClose);//)
+	QCOMPARE(tl[14].type(),Token::ParClose);//)
 }
 
 
