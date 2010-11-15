@@ -268,10 +268,16 @@ QPair< QString, QVariant > Engine::parseLiteral ( QString ex, int start)
 			cand<<d->parsers[i];
 	if(cand.size()<1)
 		return QPair<QString,QVariant>();
-	//sort them
+	//sort them (highest prio first)
 	qSort(cand);
 	//execute
-	return cand[0].parser(ex,*this,start);
+	for(int i=0;i<cand.size();i++){
+		QPair< QString, QVariant >r=cand[0].parser(ex,*this,start);
+		if(r.first.size()>0)
+			return r;
+	}
+	//failure
+	return QPair< QString, QVariant >();
 }
 
 
