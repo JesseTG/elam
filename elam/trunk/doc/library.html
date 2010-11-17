@@ -7,9 +7,62 @@
 
 <h2>Calling It</h2>
 
+<h2>Default Libray</h2>
+
+The default library defines functions and operators for integers, floats, booleans and strings. It uses exactly the operator precedence used in the <a href="syntax.html#oper_prece">Syntax</a> documentation.<p/>
+
+The type "any" is used below to denote any type that is supported by the current engine. Constraints are noted in the description. The following types are used in the default library:<br/>
+<table frame="1" border="1">
+<tr><td><b>ELAM type</b></td><td><b>QVariant</b></td><td><b>Description</b></td></tr>
+
+<tr><td>any</td><td>ELAM::AnyType</td><td>cannot be used directly, but tells the engine that any type is allowed</td></tr>
+
+<tr><td>exception</td><td>ELAM::Exception</td><td>thrown when something goes wrong (parser errors, syntactic errors, operational/conversion errors</td></tr>
+
+<tr><td>int</td><td>qlonglong</td><td>integer mathematics</td></tr>
+<tr><td>float</td><td>qreal/double</td><td>floating point mathematics</td></tr>
+<tr><td>bool</td><td>bool</td><td>boolean mathematics and logic</td></tr>
+<tr><td>string</td><td>QString</td><td>character strings</td></tr>
+</table><p/>
+
+Optional arguments are marked with [ and ].
+
+<h3>Integer Library</h3>
+
+The integer library defines some very basic integer functionality:
+<table frame="1" border="1">
+<tr><td><b>Function</b></td><td><b>Description</b></td></tr>
+<tr><td>int(any)</td><td>tries to convert the argument to integer</td><tr>
+<tr><td>int + int</td><td>adds two integers</td></tr>
+<tr><td>int - int</td><td>subtracts two integers</td></tr>
+<tr><td>int * int</td><td>multiplies two integers</td></tr>
+<tr><td>int / int</td><td>divides two integers</td></tr>
+<tr><td>int % int</td><td>calculates the modulo of two integers</td></tr>
+<tr><td>int &amp; int</td><td>calculates the bitwis AND of  two integers</td></tr>
+<tr><td>int | int</td><td>calculates the bitwis OR of  two integers</td></tr>
+<tr><td>int ^ int</td><td>calculates the bitwis XOR of  two integers</td></tr>
+<tr><td>+ int</td><td>returns the value as is</td></tr>
+<tr><td>- int</td><td>returns the integer negative of the number</td></tr>
+<tr><td>~ int</td><td>returns the bitwise negative of the integers</td></tr>
+</table>
+
+<h3>Floating Point Library</h3>
+
+The floating point library defines some very basic floating point functionality:
+<table frame="1" border="1">
+<tr><td><b>Function</b></td><td><b>Description</b></td></tr>
+<tr><td>float(any)</td><td>tries to convert the argument to floating point</td><tr>
+<tr><td>float + float</td><td>adds two floating points</td></tr>
+<tr><td>float - float</td><td>subtracts two floating points</td></tr>
+<tr><td>float * float</td><td>multiplies two floating points</td></tr>
+<tr><td>float / float</td><td>divides two floating points</td></tr>
+<tr><td>+ float</td><td>returns the value as is</td></tr>
+<tr><td>- float</td><td>returns the floating point negative of the number</td></tr>
+</table>
+
 <h2>Basic Types, Operators, Functions and Variables</h2>
 
-<h1>Extending The ElAM Libray</h1>
+<h1>Extending The ELAM Libray</h1>
 
 <h2>Redirecting Variables and Constants</h2>
 
