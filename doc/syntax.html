@@ -1,5 +1,5 @@
 <html>
-<title>ELAM</title>
+<title>ELAM Syntax</title>
 <body>
 <h1>The ELAM Syntax</h1>
 
@@ -74,6 +74,7 @@ Parentheses group operations and may alter the order in which they are executed.
 
 The equals sign ("=") has a special meaning when used in operators. In the normal mode the direct assignment operator "=" cannot be overloaded with a user specific function. If an operator ends in "=" and there is no overloaded operator, then the remainder is interpreted as a binary operator and the result assigned to the left side of the operator, for example "a+=b" is interpreted as a short form of "a=a+b".
 
+<a name="oper_prece"/>
 <h3>Operator Precedence</h3>
 
 Operators are interpreted in a specific order of precedence. First the highest precedence operators are evaluated, then the next lower precedence level, etc. with assignments being executed last. Consecutive operations with the same precedence level are executed from left to right.<p>
@@ -83,7 +84,7 @@ The default library has the following precedence order:
 <table frame="1" border="1">
 <tr><td><b>Operator Class</b><td><b>Operators</b><td><b>Precedence Value</b></tr>
 <tr><td>Parentheses<td>(parentheses), functions(...)<td>1000</tr>
-<tr><td>All Unary Operators<td> ++, --, ~, !, -, +<td>100</tr>
+<tr><td>All Unary Operators<td> ~, !, -, +<td>100</tr>
 <tr><td>Maximum usable Precedence<td>&nbsp;<td>99</tr>
 <tr><td>Multiplicative<td> *, /, %<td>90</tr>
 <tr><td>Additive<td> +, -<td>80</tr>
@@ -93,7 +94,8 @@ The default library has the following precedence order:
 <tr><td>bitwise XOR<td> ^<td>45</tr>
 <tr><td>bitwise OR<td> |<td>40</tr>
 <tr><td>logical AND<td> &amp;&amp;<td>30</tr>
-<tr><td>logical OR<td>||<td>25</tr>
+<tr><td>logical XOR<td>^^<td>25</tr>
+<tr><td>logical OR<td>||<td>20</tr>
 <tr><td>Lowest usable Precedence<td>&nbsp;<td>1</tr>
 <tr><td>assignments<td>=, +=, -=, ...<td>0</tr>
 </table><p>
