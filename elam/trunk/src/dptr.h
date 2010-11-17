@@ -51,7 +51,9 @@ The d-pointer class Private is only forward declared, you have to fully declare 
  class DPrivate{\
   public:DPrivate();DPrivate(const DPrivate&);~DPrivate();\
   DPrivate&operator=(const DPrivate&);\
-  Private*operator->()const{return d;}\
+  const Private*operator->()const{return d;}\
+  Private*operator->(){return d;}\
+  DPrivate clone()const;\
   private:Private*d;\
  }; \
  DPrivate dp;
@@ -84,6 +86,7 @@ To be used in implementation where the actual d-pointer class is implemented.
  Class::DPrivate::DPrivate(){d=new Class::Private;}\
  Class::DPrivate::DPrivate(const Class::DPrivate&dp){d=new Class::Private(*(dp.d));}\
  Class::DPrivate::~DPrivate(){delete d;}\
+ Class::DPrivate Class::DPrivate::clone()const{DPrivate r;*(r.d)=*d;return r;}\
  Class::DPrivate& Class::DPrivate::operator=(const Class::DPrivate&dp)\
  {*d=*(dp.d);return *this;}
 
@@ -115,6 +118,7 @@ To be used in implementation where the actual d-pointer class is implemented.
  Class::DPrivate::DPrivate(){d=new Class::Private;}\
  Class::DPrivate::DPrivate(const DPrivate&dp){d=dp.d;d->attach();}\
  Class::DPrivate::~DPrivate(){d->detach();}\
+ Class::DPrivate Class::DPrivate::clone()const{DPrivate r;*(r.d)=*d;return r;}\
  Class::DPrivate& Class::DPrivate::operator=(const DPrivate&dp)\
  {d->detach();d=dp.d;d->attach();return *this;}
 
