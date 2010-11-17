@@ -58,12 +58,47 @@ class Engine:public QObject
 		Engine(QObject*parent=0);
 		
 		///true if the named variable exists in this engine
-		bool hasVariable(QString)const;
+		Q_INVOKABLE bool hasVariable(QString)const;
 		///true if the named constant exists in this engine
-		bool hasConstant(QString)const;
+		Q_INVOKABLE bool hasConstant(QString)const;
 		///true if a variable or constant of that name exists in this engine
-		bool hasValue(QString)const;
+		Q_INVOKABLE bool hasValue(QString)const;
 		
+		///returns true if the named function exists
+		Q_INVOKABLE bool hasFunction(QString)const;
+		///returns the pointer to the function
+		Q_INVOKABLE Function getFunction(QString)const;
+
+		/** \brief returns an existing or new unary operator object
+		\param name the name token of the operator, if the name is not a valid operator it cannot be called from this engine until character classes change*/
+		Q_INVOKABLE UnaryOperator unaryOperator(QString name);
+		
+		/**Matching mode for priority when overwriting an operator, see binaryOperator
+		
+		The matching mode has no effect if the operator is new or the priorities match. In those cases binaryOperator always returns the operator object corresponding to the given name for this engine.
+		
+		The matching mode changes behavior if the operator exists and its priority is different from the one given in the call.
+		*/
+		enum PriorityMatch{
+			///if the operator is new: use the given priority, otherwise leave priority as is ignoring the one given in the call, this is the default
+			IgnoreMismatch=0,
+			///override the priority of the existing operator, using the priority given in the call
+			OverridePrio=1,
+			///returns a dummy operator making it impossible to overwrite the existing operator
+			FailIfMismatch=2,
+		};
+		
+		/** \brief returns an existing or new binary operator object
+		\param name the name token of the operator, if the name is not a valid operator it cannot be called from this engine until character classes change
+		\param prio the priority that should be set for the operator
+		\param match how to behave if the operator already exists and priorities do not match, see PriorityMatch
+		\returns a reference to the operator, or to a dummy operator if priority matching failed
+		*/
+		Q_INVOKABLE BinaryOperator binaryOperator(QString name,int prio=1,PriorityMatch match=IgnoreMismatch);
+		
+		///returns the priority of the operator, or -1 if the operator does not exist
+		Q_INVOKABLE int binaryOperatorPrio(QString name);
+	public slots:
 		///returns the value of the named variable or constant
 		QVariant getValue(QString)const;
 		///returns the value of the named variable (does not return constants)
@@ -94,10 +129,6 @@ class Engine:public QObject
 		///deletes a variable or constant
 		void removeValue(QString);
 		
-		///returns true if the named function exists
-		bool hasFunction(QString)const;
-		///returns the pointer to the function
-		Function getFunction(QString)const;
 		/**sets the function
 		\returns true on success or false if:
 		 - the name is not valid
@@ -122,38 +153,9 @@ class Engine:public QObject
 		///removes a parser function
 		void removeLiteralParser(LiteralParser parser);
 		
-		/** \brief returns an existing or new unary operator object
-		\param name the name token of the operator, if the name is not a valid operator it cannot be called from this engine until character classes change*/
-		UnaryOperator unaryOperator(QString name);
-		
-		/**Matching mode for priority when overwriting an operator, see binaryOperator
-		
-		The matching mode has no effect if the operator is new or the priorities match. In those cases binaryOperator always returns the operator object corresponding to the given name for this engine.
-		
-		The matching mode changes behavior if the operator exists and its priority is different from the one given in the call.
-		*/
-		enum PriorityMatch{
-			///if the operator is new: use the given priority, otherwise leave priority as is ignoring the one given in the call, this is the default
-			IgnoreMismatch=0,
-			///override the priority of the existing operator, using the priority given in the call
-			OverridePrio=1,
-			///returns a dummy operator making it impossible to overwrite the existing operator
-			FailIfMismatch=2,
-		};
-		
-		/** \brief returns an existing or new binary operator object
-		\param name the name token of the operator, if the name is not a valid operator it cannot be called from this engine until character classes change
-		\param prio the priority that should be set for the operator
-		\param match how to behave if the operator already exists and priorities do not match, see PriorityMatch
-		\returns a reference to the operator, or to a dummy operator if priority matching failed
-		*/
-		BinaryOperator binaryOperator(QString name,int prio=1,PriorityMatch match=IgnoreMismatch);
-		
-		///returns the priority of the operator, or -1 if the operator does not exist
-		int binaryOperatorPrio(QString name);
 		///sets/overrides the priority of an operator, creating the operator if it does not exist yet
 		void setBinaryOperatorPrio(QString name,int prio);
-	public slots:
+
 		///simply parses an expression string into an  object
 		Expression expression(QString);
 		///simply parses an expression string into an  object
