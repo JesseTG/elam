@@ -55,8 +55,10 @@ class Token
 
 QDebug& operator<<(QDebug&,const Token&);
 
+class Engine;
 class Expression
 {
+	DECLARE_SHARED_DPTR(d)
 	public:
 		enum Type {
 			Literal,
@@ -66,9 +68,12 @@ class Expression
 			Parentheses,
 			UnaryOp,
 			BinaryOp,
+			Exception,
 		};
-		Expression(){}
-		Expression(const QList<Token>&){}
+		Expression();
+		Expression(Engine*parent,const QList<Token>&tokens);
+		
+		QVariant evaluate();
 };
 
 //end of namespace

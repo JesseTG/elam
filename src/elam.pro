@@ -11,6 +11,9 @@ RCC_DIR = .ctmp
 HEADERS += \
 	dptr.h \
 	elam.h \
+	elamunary.h \
+	elambinary.h \
+	elamcharclass.h \
 	elamengine.h \
 	elamexpression.h \
 	elamvalue.h \
@@ -19,6 +22,9 @@ HEADERS += \
 
 SOURCES += \
 	elamvalue.cpp \
+	elamunary.cpp \
+	elambinary.cpp \
+	elamcharclass.cpp \
 	elamengine.cpp \
 	elamintengine.cpp \
 	elamexpression.cpp \
