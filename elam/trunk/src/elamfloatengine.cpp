@@ -123,16 +123,16 @@ void FloatEngine::configureFloatEngine(ELAM::Engine& eng)
 	eng.unaryOperator("-").setCallback(floatMinus,fid);
 	eng.unaryOperator("+").setCallback(floatPlus,fid);
 	//binary
-	eng.binaryOperator("-").setCallback(floatMinus,fid,fid);
+	eng.binaryOperator("-",80).setCallback(floatMinus,fid,fid);
 	eng.binaryOperator("-").setCallback(floatMinus,iid,fid);
 	eng.binaryOperator("-").setCallback(floatMinus,fid,iid);
-	eng.binaryOperator("+").setCallback(floatAdd,fid,fid);
+	eng.binaryOperator("+",80).setCallback(floatAdd,fid,fid);
 	eng.binaryOperator("+").setCallback(floatAdd,iid,fid);
 	eng.binaryOperator("+").setCallback(floatAdd,fid,iid);
-	eng.binaryOperator("*").setCallback(floatMult,fid,fid);
+	eng.binaryOperator("*",90).setCallback(floatMult,fid,fid);
 	eng.binaryOperator("*").setCallback(floatMult,iid,fid);
 	eng.binaryOperator("*").setCallback(floatMult,fid,iid);
-	eng.binaryOperator("/").setCallback(floatDiv,fid,fid);
+	eng.binaryOperator("/",90).setCallback(floatDiv,fid,fid);
 	eng.binaryOperator("/").setCallback(floatDiv,iid,fid);
 	eng.binaryOperator("/").setCallback(floatDiv,fid,iid);
 	//cast

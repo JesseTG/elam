@@ -44,16 +44,17 @@ static QVariant intFunc(const QList<QVariant>&lf)
 	return lf[0].toLongLong();
 }
 
+//unary
 static QVariant intPlus(const QVariant&o)
 {
 	return o;
 }
-
 static QVariant intMinus(const QVariant&o)
 {
 	return -o.toLongLong();
 }
 
+//additive
 static QVariant intAdd(const QVariant&o1,const QVariant&o2)
 {
 	return o1.toLongLong()+o2.toLongLong();
@@ -62,6 +63,8 @@ static QVariant intMinus(const QVariant&o1,const QVariant&o2)
 {
 	return o1.toLongLong()-o2.toLongLong();
 }
+
+//multiplicative
 static QVariant intMult(const QVariant&o1,const QVariant&o2)
 {
 	return o1.toLongLong()*o2.toLongLong();
@@ -73,6 +76,32 @@ static QVariant intDiv(const QVariant&o1,const QVariant&o2)
 		return Exception(Exception::OperationError,"division by zero");
 	return o1.toLongLong()/l2;
 }
+static QVariant intMod(const QVariant&o1,const QVariant&o2)
+{
+	qlonglong l2=o2.toLongLong();
+	if(l2==0)
+		return Exception(Exception::OperationError,"division by zero");
+	return o1.toLongLong()%l2;
+}
+
+//bitwise
+static QVariant intAnd(const QVariant&o1,const QVariant&o2)
+{
+	return o1.toLongLong()&o2.toLongLong();
+}
+static QVariant intOr(const QVariant&o1,const QVariant&o2)
+{
+	return o1.toLongLong()|o2.toLongLong();
+}
+static QVariant intXor(const QVariant&o1,const QVariant&o2)
+{
+	return o1.toLongLong()^o2.toLongLong();
+}
+static QVariant intNot(const QVariant&o)
+{
+	return ~o.toLongLong();
+}
+
 
 int IntEngine::intParserPrio()
 {
@@ -89,9 +118,14 @@ void IntEngine::configureIntEngine(ELAM::Engine& eng)
 	//unaries
 	eng.unaryOperator("-").setCallback(intMinus,iid);
 	eng.unaryOperator("+").setCallback(intPlus,iid);
+	eng.unaryOperator("~").setCallback(intNot,iid);
 	//binaries
-	eng.binaryOperator("-").setCallback(intMinus,iid,iid);
-	eng.binaryOperator("+").setCallback(intAdd,iid,iid);
-	eng.binaryOperator("*").setCallback(intMult,iid,iid);
-	eng.binaryOperator("/").setCallback(intDiv,iid,iid);
+	eng.binaryOperator("-",80).setCallback(intMinus,iid,iid);
+	eng.binaryOperator("+",80).setCallback(intAdd,iid,iid);
+	eng.binaryOperator("*",90).setCallback(intMult,iid,iid);
+	eng.binaryOperator("/",90).setCallback(intDiv,iid,iid);
+	eng.binaryOperator("%",90).setCallback(intMod,iid,iid);
+	eng.binaryOperator("&",50).setCallback(intAnd,iid,iid);
+	eng.binaryOperator("|",40).setCallback(intOr,iid,iid);
+	eng.binaryOperator("^",45).setCallback(intXor,iid,iid);
 }

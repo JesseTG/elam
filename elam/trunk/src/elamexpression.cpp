@@ -4,6 +4,9 @@
 
 namespace ELAM {
 
+///////////////////////////////////////////////////////////////////////////////
+// Token
+
 class DPTR_CLASS_NAME(Token):public DPtr
 {
 	public:
@@ -57,5 +60,29 @@ QDebug&operator<<(QDebug&dbg,const Token&tok)
 	dbg<<",pos="<<tok.position()<<")";
 	return dbg.space();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Expression
+
+class DPTR_CLASS_NAME(Expression):public SharedDPtr
+{
+};
+DEFINE_SHARED_DPTR(Expression);
+
+Expression::Expression()
+{
+
+}
+Expression::Expression(Engine* parent, const QList< Token >& tokens)
+{
+
+}
+
+QVariant Expression::evaluate()
+{
+	return QVariant();
+}
+
+
 
 };
