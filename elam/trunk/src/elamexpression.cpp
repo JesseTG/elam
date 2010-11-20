@@ -12,10 +12,9 @@ namespace ELAM {
 class DPTR_CLASS_NAME(Token):public SharedDPtr
 {
 	public:
-		DPTR_NAME(){type=Invalid;subtype=None;}
+		DPTR_NAME(){type=Invalid;}
 		QString cont;
 		Type type;
-		SubType subtype;
 		QVariant val;
 		Position pos;
 		QList<Token>subtok;
@@ -32,8 +31,12 @@ Token::Token(Position pos)
 Token::Token(QString c,Token::Type t,Position pos)
 {
 	d->cont=c;
-	d->type=t;
 	d->pos=pos;
+	//genericise most types
+	if(t&LiteralMask)d->type=Literal;else
+	if(t&NameMask)d->type=Name;else
+	if(t&OperatorMask)d->type=Operator;
+	else d->type=t;
 }
 
 Token::Token(QString c,QVariant v,Position pos)
@@ -50,8 +53,12 @@ QVariant Token::literalValue()const{return d->val;}
 Position Token::position()const{return d->pos;}
 
 QList< Token > Token::subTokens() const{return d->subtok;}
-Token::SubType Token::subType() const{return d->subtype;}
-void Token::setSubType(Token::SubType s){d->subtype=s;}
+void Token::setSubType(Token::Type s)
+{
+	//only set if it becomes more specialized
+	if(d->type&s)
+		d->type=s;
+}
 void Token::addSubToken(const ELAM::Token& t)
 {
 	d->subtok<<t;
@@ -91,17 +98,13 @@ static void printtoken(QDebug&dbg,const Token&tok,int level)
 		case Token::Literal:dbg<<"LiteralValue,value="<<tok.literalValue();break;
 		case Token::Whitespace:dbg<<"WhiteSpace";break;
 		case Token::Parentheses:dbg<<"Parentheses";break;
-	}
-	if(tok.subType()!=Token::None){
-		dbg<<",subtype=";
-		switch(tok.subType()){
-			case Token::Function:dbg<<"Function";break;
-			case Token::Constant:dbg<<"Constant";break;
-			case Token::Variable:dbg<<"Variable";break;
-			case Token::UnaryOp:dbg<<"Unary";break;
-			case Token::BinaryOp:dbg<<"Binary";break;
-			default:break;
-		}
+		case Token::Function:dbg<<"Function";break;
+		case Token::Constant:dbg<<"Constant";break;
+		case Token::Variable:dbg<<"Variable";break;
+		case Token::UnaryOp:dbg<<"Unary";break;
+		case Token::BinaryOp:dbg<<"Binary";break;
+		case Token::AssignmentOp:dbg<<"Assignment";break;
+		default:dbg<<"Unknown:"<<(int)tok.type();break;
 	}
 	dbg<<",pos="<<tok.position();
 	QList<Token> sub=tok.subTokens();
@@ -124,18 +127,6 @@ QDebug&operator<<(QDebug&dbg,const QList<Token>&tok)
 	printtokenlist(dbg,tok,0,0);
 	return dbg.space();
 }
-///////////////////////////////////////////////////////////////////////////////
-// TokenBundle
-
-class TokenBundle
-{
-	public:
-		TokenBundle(const Token&);
-		TokenBundle(const TokenBundle&);
-		TokenBundle(const QList<Token>&);
-	private:
-		QList<TokenBundle>&mtoks;
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Expression
@@ -143,23 +134,24 @@ class TokenBundle
 class DPTR_CLASS_NAME(Expression):public SharedDPtr
 {
 	public:
-		DPTR_NAME(){type=Exception;}
+		DPTR_NAME(){type=Exception;oppos=-1;}
 		QPointer<Engine>parent;
 		QList<Token>tokens;
 		Type type;
-		QVariant value;
+		ELAM::Exception excep;
+		QList<Expression>subexpr;
+		int oppos;
 };
 DEFINE_SHARED_DPTR(Expression);
 
 Expression::Expression()
 {
-
+	d->excep=ELAM::Exception(ELAM::Exception::ParserError,"Invalid Expression");
 }
 
 //reduce surrounding parentheses and whitespace
-static inline QList<Token>simplifyTokens(Engine*eng,QList<Token> toks)
+inline QList<Token>Expression::simplifyTokens(QList<Token> toks)
 {
-	Q_UNUSED(eng);
 	QList<Token>ret;
 	int min=0,max=toks.size()-1;
 	//eliminate redundant parentheses
@@ -176,9 +168,9 @@ static inline QList<Token>simplifyTokens(Engine*eng,QList<Token> toks)
 	return ret;
 }
 
-//reduce surrounding parentheses and whitespace
-static inline QList<Token>classifyTokens(Engine*eng,QList<Token> toks)
+inline QList<Token>Expression::classifyTokens(QList<Token> toks)
 {
+	Engine*eng=d->parent;
 	QList<Token>ret;
 	if(toks.size()<1)return toks;
 	//check token 0
@@ -200,14 +192,13 @@ static inline QList<Token>classifyTokens(Engine*eng,QList<Token> toks)
 		}else
 		//define operators
 		if(t.type()==Token::Operator){
-			switch(toks[i-1].type()){
-				case Token::ParOpen:
-				case Token::Operator:
-					t.setSubType(Token::UnaryOp);
-					break;
-				default:
+			if(toks[i-1].type() & (Token::Parentheses | Token::ParOpen | Token::OperatorMask))
+				t.setSubType(Token::UnaryOp);
+			else{
+				if(eng->isAssignment(toks[i].content()))
+					t.setSubType(Token::AssignmentOp);
+				else
 					t.setSubType(Token::BinaryOp);
-					break;
 			}
 		}
 		//add
@@ -215,31 +206,31 @@ static inline QList<Token>classifyTokens(Engine*eng,QList<Token> toks)
 	}
 	return ret;
 }
-//reduce surrounding parentheses and whitespace
-static inline QList<Token>reduceTokens(Engine*eng,QList<Token> toks)
+
+inline QList<Token>Expression::reduceTokens(QList<Token> toks)
 {
-	toks=classifyTokens(eng,simplifyTokens(eng,toks));
+	toks=classifyTokens(simplifyTokens(toks));
 	QList<Token>ret,sub;
 	//copy and create hierarchy
 	int pcnt=0;
 	for(int i=0;i<toks.size();i++){
 		//count parentheses
 		if(toks[i].type()==Token::ParOpen){
-			if(!pcnt){
-				if(i==0 || toks.value(i-1).subType()!=Token::Function)
+			pcnt++;
+			if(pcnt==1){
+				if(i==0 || toks.value(i-1).type()!=Token::Function)
 					ret<<Token("",Token::Parentheses,toks[i].position());
 				sub.clear();
+				continue;
 			}
-			pcnt++;
-			continue;
 		}else
 		if(toks[i].type()==Token::ParClose){
 			pcnt--;
-			if(!pcnt){
+			if(pcnt==0){
 				ret[ret.size()-1].setSubTokens(sub);
 				sub.clear();
+				continue;
 			}
-			continue;
 		}
 		//collect tokens
 		if(pcnt)
@@ -249,13 +240,13 @@ static inline QList<Token>reduceTokens(Engine*eng,QList<Token> toks)
 	}
 	return ret;
 }
-//scan for simple errors, return exception (NoError if no error found)
-static inline Exception scanForError(const QList< Token >& toks)
+
+inline Exception Expression::scanForError(const QList< Token >& toks)
 {
 	//check for invalid tokens
 	for(int i=0;i<toks.size();i++)
 		if(toks[i].type()==Token::Invalid){
-			return Exception(Exception::ParserError, "invalid token", toks[i].position());
+			return ELAM::Exception(Exception::ParserError, "invalid token", toks[i].position());
 		}
 	//scan for parentheses mismatch
 	int pcnt=0;
@@ -264,14 +255,14 @@ static inline Exception scanForError(const QList< Token >& toks)
 		if(toks[i].type()==Token::ParOpen)pcnt++;else
 		if(toks[i].type()==Token::ParClose)pcnt--;
 		if(pcnt<0){
-			return Exception(Exception::ParserError, "parentheses mismatch", toks[i].position());
+			return ELAM::Exception(ELAM::Exception::ParserError, "parentheses mismatch", toks[i].position());
 		}
 	}
 	if(pcnt!=0){
-		return Exception(Exception::ParserError, "parentheses mismatch", toks[0].position());
+		return ELAM::Exception(ELAM::Exception::ParserError, "parentheses mismatch", toks[0].position());
 	}
 	//nothing found
-	return Exception(Exception::NoError);
+	return ELAM::Exception(ELAM::Exception::NoError);
 }
 
 Expression::Expression(Engine* parent, const QList< Token >& toks)
@@ -280,48 +271,121 @@ Expression::Expression(Engine* parent, const QList< Token >& toks)
 	ELAM::Exception ex=scanForError(toks);
 	if(ex.errorType()!=ELAM::Exception::NoError){
 		d->type=Exception;
-		d->value=ex;
+		d->excep=ex;
 		d->tokens=toks;
 		return;
 	}
 	d->parent=parent;
-	d->tokens=reduceTokens(parent,toks);
+	d->tokens=reduceTokens(toks);
 	qDebug()<<"expression:"<<d->tokens;
 	//check for nothing and complain
 	if(d->tokens.size()==0){
 		d->type=Exception;
-		d->value=ELAM::Exception(ELAM::Exception::ParserError,"no tokens", (toks.size()>0?toks[0].position():Position()));
+		d->excep=ELAM::Exception(ELAM::Exception::ParserError,"no tokens", (toks.size()>0?toks[0].position():Position()));
 		return;
 	}
-	//check for simplicity (literals, vars, consts)
+	//order 1: check for simplicity (literals, vars, consts)
 	if(d->tokens.size()==1){
 		switch(d->tokens[0].type()){
-			case Token::Name:
-				if(parent->hasFunction(d->tokens[0].content())){
-					d->type=Exception;
-					d->value=ELAM::Exception(ELAM::Exception::ParserError, "function call incomplete", d->tokens[0].position());
-				}else if(parent->hasConstant(d->tokens[0].content())){
-					d->type=Constant;
-					d->value=parent->getConstant(d->tokens[0].content());
-				}else{
-					d->type=Variable;
-				}
+			case Token::Function:
+				functionInit();
+				d->type=(Type)d->tokens[0].type();
 				break;
+			case Token::Parentheses:
+				d->subexpr<<Expression(parent,d->tokens[0].subTokens());
+				d->type=(Type)d->tokens[0].type();
+				break;
+			case Token::Constant:
+			case Token::Variable:
 			case Token::Literal:
-				d->type=Literal;
-				d->value=d->tokens[0].literalValue();
+				d->type=(Type)d->tokens[0].type();
 				break;
 			default:
+				qDebug()<<"expression in single token mode: unexpected token" <<d->tokens[0];
 				d->type=Exception;
-				d->value=ELAM::Exception(ELAM::Exception::ParserError, "unexpected token", d->tokens[0].position());
+				d->excep=ELAM::Exception(ELAM::Exception::ParserError, "unexpected token", d->tokens[0].position());
 				break;
 		}
 		return;
 	}
+	//search for assignment
+	for(int i=0;i<d->tokens.size();i++){
+		if(d->tokens[i].type()==Token::AssignmentOp){
+			//check 1: position is 1
+			if(i!=1){
+				d->type=Exception;
+				d->excep=ELAM::Exception(ELAM::Exception::ParserError, "invalid assignment", d->tokens[i].position());
+				return;
+			}
+			//check 2: pos 0 is variable
+			if(d->tokens[0].type()!=Token::Variable){
+				d->type=Exception;
+				d->excep=ELAM::Exception(ELAM::Exception::OperationError, "left side of assignment must be a variable", d->tokens[i].position());
+				return;
+			}
+			//check 3: there is a right
+			if(d->tokens.size()<3){
+				d->type=Exception;
+				d->excep=ELAM::Exception(ELAM::Exception::OperationError, "assignment must have right side expression", d->tokens[i].position());
+				return;
+			}
+			//ok
+			d->subexpr<<Expression(parent,d->tokens.mid(2));
+			return;
+		}
+	}
+	//search for lowest operator on the right
+	int cprio=1000,cpos=-1;
+	for(int i=0;i<d->tokens.size();i++){
+		if(d->tokens[i].type()==Token::BinaryOp){
+			int oprio=d->parent->binaryOperatorPrio(d->tokens[i].content());
+			if(oprio<=cprio){
+				cprio=oprio;
+				cpos=i;
+			}
+		}else if(d->tokens[i].type()==Token::UnaryOp){
+			if(cprio>100){
+				cprio=100;
+				cpos=i;
+			}
+		}
+	}
+	//validity check
+	if(cpos<0){
+		d->type=Exception;
+		d->excep=ELAM::Exception(ELAM::Exception::ParserError, "invalid expression", d->tokens[0].position());
+		return;
+	}
+	//split operation
+	d->oppos=cpos;
+	if(d->tokens[cpos].type()==Token::BinaryOp){
+		d->subexpr<<Expression(parent,d->tokens.mid(0,cpos));
+		d->subexpr<<Expression(parent,d->tokens.mid(cpos+1));
+	}else{
+		d->subexpr<<Expression(parent,d->tokens.mid(cpos+1));
+	}
 }
+
+void Expression::functionInit()
+{
+	QList<Token>sub=d->tokens[0].subTokens();
+	QList<Token>par;
+	for(int i=0;i<sub.size();i++){
+		if(sub[i].type()==Token::Comma){
+			d->subexpr<<Expression(d->parent,par);
+			par.clear();
+		}
+	}
+	if(par.size()>0){
+		d->subexpr<<Expression(d->parent,par);
+	}
+}
+
 
 QVariant Expression::evaluate()
 {
+	if(d->type==Exception)return d->excep;
+	if(d->parent.isNull())return ELAM::Exception(ELAM::Exception::OperationError,"Lost engine context, cannot evaluate.");
 	return QVariant();
 }
 

@@ -180,27 +180,6 @@ Token::Type CharacterClassSettings::charType(QChar c, ELAM::Token::Type otype) c
 	return Token::Invalid;
 }
 
-bool CharacterClassSettings::isAssignment(QString op)const
-{
-	//sanity checks: size
-	if(op.size()<1)return false;
-	if(d->assignmentChars.first!=0 && d->assignmentChars.second!=0)
-		if(op.size()<2)return false;
-	//check we have assignments at all
-	if(d->assignmentChars.first==0 && d->assignmentChars.second==0)return false;
-	//check it is assignment
-	if(d->assignmentChars.first!=0 && op[0]!=d->assignmentChars.first)
-		return false;
-	if(d->assignmentChars.second!=0 && op[op.size()-1]!=d->assignmentChars.second)
-		return false;
-	//check it is an operator
-	for(int i=0;i<op.size();i++)
-		if(!d->operatorClass.contains(op[i]))
-			return false;
-	//passed everything
-	return true;
-}
-
 bool CharacterClassSettings::isSimpleAssignment ( QString op) const
 {
 	if(op.size()<1)return false;
@@ -228,6 +207,28 @@ bool CharacterClassSettings::isOperator(QString op) const
 	return true;
 }
 
+QString CharacterClassSettings::toOperator(QString op) const
+{
+	if(!isOperator(op))return QString();
+	if(!isAssignment(op))return op;
+	if(d->assignmentChars.first!=0)op=op.mid(1);
+	if(d->assignmentChars.second!=0)op=op.left(op.size()-1);
+	return op;
+}
+
+bool CharacterClassSettings::isAssignment(QString op)const
+{
+	//sanity check
+	int cnt=0;
+	if(d->assignmentChars.first!=0)cnt++;
+	if(d->assignmentChars.second!=0)cnt++;
+	if(cnt==0 || op.size()<cnt)return false;
+	if(!isOperator(op))return false;
+	//char check
+	if(d->assignmentChars.first!=0 && d->assignmentChars.first!=op[0])return false;
+	if(d->assignmentChars.second!=0 && d->assignmentChars.second!=op[op.size()-1])return false;
+	return true;
+}
 
 //end of namespace
 };

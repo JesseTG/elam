@@ -146,6 +146,9 @@ class CharacterClassSettings
 		
 		///returns true if the string can be interpreted as operator
 		bool isOperator(QString)const;
+		
+		///removes assignment chars from the token and returns the pure operator or an empty string if it was a pure assignment
+		QString toOperator(QString)const;
 };
 
 //end of namespace
