@@ -98,6 +98,9 @@ class Engine:public QObject
 		
 		///returns the priority of the operator, or -1 if the operator does not exist
 		Q_INVOKABLE int binaryOperatorPrio(QString name);
+		
+		///returns true if the name represents an assignment operator
+		Q_INVOKABLE bool isAssignment(QString name)const;
 	public slots:
 		///returns the value of the named variable or constant
 		QVariant getValue(QString)const;

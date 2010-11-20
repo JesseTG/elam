@@ -13,7 +13,7 @@ void ElamTest::evaltest()
 {
 	IntEngine ie;
 	FloatEngine::configureFloatEngine(ie);
-	QString ex="a= 345*(65.3/(5))";
+	QString ex="a=b+=345*int(3.5)+ - -(+65/(5))";
 	QVariant v=ie.evaluate(ex);
 }
 

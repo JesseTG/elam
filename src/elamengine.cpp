@@ -338,6 +338,16 @@ UnaryOperator Engine::unaryOperator ( QString name )
 	return d->unary[name];
 }
 
+bool Engine::isAssignment(QString name) const
+{
+	//is it composed of operator chars?
+	if(!d->cclass.isOperator(name))return false;
+	//is there an overriding operator?
+	if(d->binary.contains(name))return false;
+	//return cclasses view of things
+	return d->cclass.isAssignment(name);
+}
+
 
 //end of namespace
 };
