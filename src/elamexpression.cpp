@@ -277,7 +277,7 @@ Expression::Expression(Engine* parent, const QList< Token >& toks)
 	}
 	d->parent=parent;
 	d->tokens=reduceTokens(toks);
-	qDebug()<<"expression:"<<d->tokens;
+	qDebug()<<"tokens:"<<d->tokens;
 	//check for nothing and complain
 	if(d->tokens.size()==0){
 		d->type=Exception;
@@ -389,6 +389,40 @@ QVariant Expression::evaluate()
 	return QVariant();
 }
 
+void printExpression(QDebug&dbg,const Expression&ex,int level)
+{
+	printspaces(dbg,level);
+	dbg<<"Expression(type=";
+	switch(ex.d->type){
+		case Expression::Literal:dbg<<"Literal";break;
+		case Expression::Variable:dbg<<"Variable";break;
+		case Expression::Constant:dbg<<"Constant";break;
+		case Expression::Function:dbg<<"Function";break;
+		case Expression::Parentheses:dbg<<"Parentheses";break;
+		case Expression::UnaryOp:dbg<<"UnaryOperator";break;
+		case Expression::BinaryOp:dbg<<"BinaryOperator";break;
+		case Expression::AssignmentOp:dbg<<"Assignment";break;
+		case Expression::Exception:dbg<<"Exception";break;
+		default:dbg<<"Unknown:"<<(int)ex.d->type;break;
+	}
+	if(ex.d->excep.errorType()!=ELAM::Exception::NoError)
+		dbg<<",exception="<<ex.d->excep;
+	if(ex.d->subexpr.size()>0){
+		dbg<<",subexpressions:";
+		for(int i=0;i<ex.d->subexpr.size();i++){
+			dbg<<"\n";
+			printExpression(dbg,ex.d->subexpr[i],level+1);
+		}
+	}
+	dbg<<")";
+}
+
+QDebug& operator<<(QDebug&dbg,const Expression&ex)
+{
+	dbg.nospace();
+	printExpression(dbg,ex,0);
+	return dbg.space();
+}
 
 
 };

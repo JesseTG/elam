@@ -134,6 +134,7 @@ class Expression
 		///evaluates the expression and returns the result of the evaluation
 		QVariant evaluate();
 	private:
+		friend  void printExpression(QDebug&,const Expression&,int);
 		///scan tokens and decide what specific sub-type they are
 		QList<Token>classifyTokens(QList<Token> toks);
 		/**pushes parentheses and function arguments into the sub-tokens of their parents;
@@ -146,6 +147,8 @@ class Expression
 		///parses tokens and splits them by comma
 		void functionInit();
 };
+
+QDebug& operator<<(QDebug&,const Expression&);
 
 //end of namespace
 };
