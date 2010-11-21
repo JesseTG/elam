@@ -68,6 +68,11 @@ class Engine:public QObject
 		Q_INVOKABLE bool hasFunction(QString)const;
 		///returns the pointer to the function
 		Q_INVOKABLE Function getFunction(QString)const;
+		
+		///returns true if there is an unaryOperator with this name
+		Q_INVOKABLE bool hasUnaryOperator(QString name)const;
+		///returns true if there is an binaryOperator with this name
+		Q_INVOKABLE bool hasBinaryOperator(QString name)const;
 
 		/** \brief returns an existing or new unary operator object
 		\param name the name token of the operator, if the name is not a valid operator it cannot be called from this engine until character classes change*/

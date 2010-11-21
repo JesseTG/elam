@@ -45,15 +45,15 @@ UnaryOperator::~UnaryOperator()
 QVariant UnaryOperator::execute(const QVariant& op) const
 {
 	if(d->callmap.size()==0)
-		return qVariantFromValue<Exception>(Exception(Exception::UnknownOperatorError));
+		return Exception(Exception::UnknownOperatorError);
 	//search for direct match
-	if(d->callmap.contains(op.type()))
-		return d->callmap[op.type()](op);
+	if(d->callmap.contains(op.userType()))
+		return d->callmap[op.userType()](op);
 	//search for fallback
 	int any=AnyType::metaTypeId();
 	if(d->callmap.contains(any))
 		return d->callmap[any](op);
-	return qVariantFromValue<Exception>(Exception(Exception::TypeMismatchError));
+	return Exception(Exception::TypeMismatchError);
 }
 
 QList< int > UnaryOperator::getTypeIds() const
@@ -115,6 +115,11 @@ void UnaryOperator::removeCallback(QString t)
 void UnaryOperator::removeCallback(int t)
 {
 	d->callmap.remove(t);
+}
+
+bool UnaryOperator::isNull() const
+{
+	return d->callmap.isEmpty();
 }
 
 

@@ -301,6 +301,9 @@ BinaryOperator Engine::binaryOperator ( QString name,int prio,PriorityMatch matc
 	//check whether prio matches
 	if(d->binary[name].prio==prio)
 		return d->binary[name].op;
+	//override if the op is empty
+	if(d->binary[name].op.isNull())
+		match=OverridePrio;
 	//check matching mode
 	switch(match){
 		case OverridePrio:
@@ -346,6 +349,18 @@ bool Engine::isAssignment(QString name) const
 	if(d->binary.contains(name))return false;
 	//return cclasses view of things
 	return d->cclass.isAssignment(name);
+}
+
+bool Engine::hasBinaryOperator(QString name) const
+{
+	if(!d->binary.contains(name))return false;
+	return ! d->binary[name].op.isNull();
+}
+
+bool Engine::hasUnaryOperator(QString name) const
+{
+	if(!d->unary.contains(name))return false;
+	return ! d->unary[name].isNull();
 }
 
 
