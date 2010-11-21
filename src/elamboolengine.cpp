@@ -109,21 +109,21 @@ static QVariant isExceptionFunc(const QList<QVariant>&lf)
 {
 	if(lf.size()!=1)
 		return Exception(Exception::ArgumentListError, "expecting exactly one argument");
-	return lf[0].type()==Exception::metaTypeId();
+	return lf[0].userType()==Exception::metaTypeId();
 }
 
 static QVariant isExceptionOrNullFunc(const QList<QVariant>&lf)
 {
 	if(lf.size()!=1)
 		return Exception(Exception::ArgumentListError, "expecting exactly one argument");
-	return lf[0].isNull() || lf[0].type()==Exception::metaTypeId();
+	return lf[0].isNull() || lf[0].userType()==Exception::metaTypeId();
 }
 
 static QVariant catchFunc(const QList<QVariant>&lf)
 {
 	if(lf.size()<1||lf.size()>3)
 		return Exception(Exception::ArgumentListError, "expecting 1-3 arguments");
-	if(lf[0].type()==Exception::metaTypeId()){
+	if(lf[0].userType()==Exception::metaTypeId()){
 		if(lf.size()>1)return lf[1];
 		else return true;
 	}else{

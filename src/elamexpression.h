@@ -99,12 +99,18 @@ class Token
 		inline bool isLiteral()const{return type()&LiteralMask;}
 	protected:
 		friend class Expression;
+		///makes the tokens type more specialized
 		void setSubType(Type);
+		///adds a token to the sub-token list
 		void addSubToken(const Token&);
+		///overrides the list of sub-tokens
 		void setSubTokens(const QList<Token>&);
 };
 
-QDebug& operator<<(QDebug&,const Token&);
+///makes tokens accessable to qDebug()
+QDebug& operator<<(QDebug,const Token&);
+///makes tokens accessable to qDebug()
+QDebug& operator<<(QDebug,const QList<Token>&);
 
 class Engine;
 /**Represents an expression in the context of its engine.
@@ -133,8 +139,13 @@ class Expression
 		
 		///evaluates the expression and returns the result of the evaluation
 		QVariant evaluate();
+		
+		///returns the position of the main element of this expression
+		Position position()const;
 	private:
-		friend  void printExpression(QDebug&,const Expression&,int);
+		friend QDebug& operator<<(QDebug,const Expression&);
+		///helper for qDebug()
+		static void printExpression(QDebug&,const Expression&,int);
 		///scan tokens and decide what specific sub-type they are
 		QList<Token>classifyTokens(QList<Token> toks);
 		/**pushes parentheses and function arguments into the sub-tokens of their parents;
@@ -146,9 +157,18 @@ class Expression
 		QList<Token>simplifyTokens(QList<Token> toks);
 		///parses tokens and splits them by comma
 		void functionInit();
+		///helper for evaluate - evaluates a function
+		QVariant evalFunction();
+		///helper for evaluate - evaluates an unary operator
+		QVariant evalUnary();
+		///helper for evaluate - evaluates an binary operator
+		QVariant evalBinary();
+		///helper for evaluate - evaluates an assignment and an optional binary operator
+		QVariant evalAssign();
 };
 
-QDebug& operator<<(QDebug&,const Expression&);
+///makes expressions accessable to qDebug()
+QDebug& operator<<(QDebug,const Expression&);
 
 //end of namespace
 };

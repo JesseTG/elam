@@ -67,6 +67,9 @@ class UnaryOperator
 		
 		///calls the callback function associated with the type of the argument, throws an exception if there is no callback
 		QVariant execute(const QVariant&)const;
+		
+		///true if this operator has no callbacks
+		bool isNull()const;
 };
 
 //end of namespace

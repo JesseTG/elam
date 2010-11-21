@@ -42,57 +42,86 @@ BinaryOperator::~BinaryOperator()
 
 QVariant BinaryOperator::execute ( const QVariant&op1,const QVariant&op2 ) const
 {
-	//TODO: implement
-	return QVariant();
+	//search for match
+	QPair<int,int>k(op1.userType(),op2.userType());
+	QPair<int,int>kl(k.first,AnyType::metaTypeId());
+	QPair<int,int>kr(AnyType::metaTypeId(),k.second);
+	QPair<int,int>ka(AnyType::metaTypeId(),AnyType::metaTypeId());
+	BinaryOperatorCall bc=0;
+	//search for perfect, then left, then right, then any match
+	if(d->callmap.contains(k))bc=d->callmap[k];else
+	if(d->callmap.contains(kl))bc=d->callmap[kl];else
+	if(d->callmap.contains(kr))bc=d->callmap[kr];else
+	if(d->callmap.contains(ka))bc=d->callmap[ka];
+	//bail out if none found
+	if(bc==0)
+		return Exception(Exception::TypeMismatchError, "operator cannot work on this type");
+	//execute
+	return bc(op1,op2);
 }
 
 BinaryOperatorCall BinaryOperator::getCallback ( QString type1, QString type2 ) const
 {
-	//TODO: implement
-	return 0;
+	QPair<int,int>k( QVariant::nameToType(type1.toAscii().data()), QVariant::nameToType(type2.toAscii().data()));
+	if(d->callmap.contains(k))
+		return d->callmap[k];
+	else
+		return 0;
 }
 
 BinaryOperatorCall BinaryOperator::getCallback ( int type1, int type2 ) const
 {
-	//TODO: implement
-	return 0;
+	QPair<int,int>k(type1,type2);
+	if(d->callmap.contains(k))
+		return d->callmap[k];
+	else
+		return 0;
 }
 
 QList< QPair< int, int > > BinaryOperator::getTypeIds() const
 {
-	//TODO: implement
-	return QList< QPair< int, int > > ();
+	return d->callmap.keys();
 }
 QList< QPair< QString, QString > > BinaryOperator::getTypeNames() const
 {
-	//TODO: implement
-	return QList< QPair< QString, QString > >();
+	QList<QPair<int,int> > k=d->callmap.keys();
+	QList<QPair<QString,QString> >ret;
+	for(int i=0;i<k.size();i++)
+		ret<<QPair<QString,QString>( QVariant::typeToName((QVariant::Type)k[i].first), QVariant::typeToName((QVariant::Type)k[i].second));
+	return ret;
 }
-void BinaryOperator::removeCallback ( BinaryOperatorCall )
+void BinaryOperator::removeCallback ( BinaryOperatorCall c)
 {
-	//TODO: implement
-
+	QList<QPair<int,int> > k=d->callmap.keys();
+	for(int i=0;i<k.size();i++)
+		if(d->callmap[k[i]]==c)
+			d->callmap.remove(k[i]);
 }
-void BinaryOperator::removeCallback ( QString , QString )
+void BinaryOperator::removeCallback ( QString t1, QString t2)
 {
-	//TODO: implement
-
+	removeCallback( QVariant::nameToType(t1.toAscii().data()), QVariant::nameToType(t2.toAscii().data()));
 }
-void BinaryOperator::removeCallback ( int , int )
+void BinaryOperator::removeCallback ( int t1, int t2)
 {
-	//TODO: implement
-
+	d->callmap.remove(QPair<int,int>(t1,t2));
 }
 void BinaryOperator::setCallback ( BinaryOperatorCall callback, QString type1, QString type2 )
 {
-	//TODO: implement
-
+	setCallback(callback, QVariant::nameToType(type1.toAscii().data()), QVariant::nameToType(type2.toAscii().data()));
 }
 void BinaryOperator::setCallback ( BinaryOperatorCall callback, int type1, int type2 )
 {
-	//TODO: implement
-
+	if(callback==0)
+		d->callmap.remove(QPair<int,int>(type1,type2));
+	else
+		d->callmap.insert(QPair<int,int>(type1,type2),callback);
 }
+
+bool BinaryOperator::isNull() const
+{
+	return d->callmap.isEmpty();
+}
+
 
 //end of namespace
 };

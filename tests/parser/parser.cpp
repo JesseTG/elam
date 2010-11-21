@@ -4,7 +4,7 @@
 
 #include <QtCore>
 #include <QtTest>
-#include <QDebug>
+// #include <QDebug>
 
 using namespace ELAM;
 
