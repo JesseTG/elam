@@ -43,6 +43,11 @@ If the parser does not find a valid literal according to its rules it must retur
 */
 typedef QPair<QString,QVariant> (*LiteralParser)(const QString&expr,Engine&engine,int start);
 
+/**Wraps a cast function to convert various types into another type.
+\param orig the original value of any type
+\returns the converted value that must conform to the expected type*/
+typedef QVariant (*TypeCast)(const QVariant&orig);
+
 /**The calculation engine of .
 
 Instances of this class can be configured to represent a specific system of functions and operators.
@@ -106,6 +111,11 @@ class Engine:public QObject
 		
 		///returns true if the name represents an assignment operator
 		Q_INVOKABLE bool isAssignment(QString name)const;
+
+		/**performs automatic casting
+		\returns the casted value or the original value if it is of a primary type or if there is no known cast for it*/
+		Q_INVOKABLE QVariant autoCast(const QVariant&)const;
+
 	public slots:
 		///returns the value of the named variable or constant
 		QVariant getValue(QString)const;
@@ -163,7 +173,20 @@ class Engine:public QObject
 		
 		///sets/overrides the priority of an operator, creating the operator if it does not exist yet
 		void setBinaryOperatorPrio(QString name,int prio);
-
+		
+		/**registers a type as primary, this means it is not cast into another type when encountered
+		\param typeId the QVariant ID of the type to register*/
+		void registerType(int typeId);
+		/**Registers an automatic cast function.
+		
+		Automatic cast functions must succeed in converting, if the result is uncertain (e.g. as in converting a string to a number) use an explicit function.
+		
+		\param target the target of the cast function, the target is automatically registered as primary type (see registerType)
+		\param origin type IDs that are automatically converted using this function, origins that are also primary types are ignored
+		\param castfunc the function that converts these types
+		\param prio the priority of the cast, if a cast function for the same origin, but a higher priority exists the one with the higher priority is used; the priority must be a positive value*/
+		void setAutoCast(int target,QList<int>origin,TypeCast castfunc,int prio=50);
+		
 		///simply parses an expression string into an  object
 		Expression expression(QString);
 		///simply parses an expression string into an  object
