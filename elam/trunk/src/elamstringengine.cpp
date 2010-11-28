@@ -148,10 +148,13 @@ int StringEngine::stringParserPrio()
 	return 50;
 }
 
+static QVariant strCast(const QVariant&v){return v.toString();}
+
 void StringEngine::configureStringEngine(Engine& eng)
 {
 	int sid=QVariant::String;
 	int aid=AnyType::metaTypeId();
+	eng.setAutoCast(sid, QList<int>()<<QVariant::Char, strCast, 40);
 	//parser
 	eng.setLiteralParser(strLiteralParser,"\'\"",stringParserPrio());
 	//cast

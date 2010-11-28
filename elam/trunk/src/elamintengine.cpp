@@ -108,11 +108,14 @@ int IntEngine::intParserPrio()
 	return 20;
 }
 
+static QVariant intCast(const QVariant&v){return v.toLongLong();}
 
 void IntEngine::configureIntEngine(ELAM::Engine& eng)
 {
 	int iid=QVariant::LongLong;
 	eng.setLiteralParser(IntLiteralParser,"0123456789",intParserPrio());
+	eng.setAutoCast(iid, QList<int>()<<QVariant::Int<<QVariant::UInt<<QVariant::ULongLong, intCast, 40);
+	eng.setAutoCast(iid, QList<int>()<<QVariant::Double, intCast, 30);
 	//cast
 	eng.setFunction("int",intFunc);
 	//unaries

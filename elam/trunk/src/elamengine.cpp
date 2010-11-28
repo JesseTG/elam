@@ -36,12 +36,20 @@ class DPTR_CLASS_NAME(Engine):public DPtr
 			int prio;
 		};
 		QMap<QString,BinaryOperator_s>binary;
+		struct CastFunc_s {
+			CastFunc_s(int p=50){prio=p;target=-1;cfunc=0;}
+			int target,prio;
+			QList<int>origin;
+			TypeCast cfunc;
+		};
+		QList<CastFunc_s>casts;
+		QList<int>primtypes;
 };
 DEFINE_DPTR(Engine);
 
 Engine::Engine(QObject* parent): QObject(parent)
 {
-
+	registerType(Exception::metaTypeId());
 }
 
 QVariant Engine::evaluate(QString ex)
@@ -196,7 +204,7 @@ bool Engine::setConstant(QString n, QVariant v)
 	if(!d->cclass.isName(n))return false;
 	if(d->funcs.contains(n))return false;
 	d->vars.remove(n);
-	d->consts.insert(n,v);
+	d->consts.insert(n,autoCast(v));
 	return true;
 }
 
@@ -205,7 +213,7 @@ bool Engine::setVariable(QString n, QVariant v)
 	if(!d->cclass.isName(n))return false;
 	if(d->consts.contains(n))return false;
 	if(d->funcs.contains(n))return false;
-	d->vars.insert(n,v);
+	d->vars.insert(n,autoCast(v));
 	return true;
 }
 
@@ -361,6 +369,44 @@ bool Engine::hasUnaryOperator(QString name) const
 {
 	if(!d->unary.contains(name))return false;
 	return ! d->unary[name].isNull();
+}
+
+void Engine::registerType(int typeId)
+{
+	if(!d->primtypes.contains(typeId))
+		d->primtypes.append(typeId);
+}
+
+void Engine::setAutoCast(int target, QList< int > origin, TypeCast castfunc, int prio)
+{
+	if(castfunc==0)return;
+	if(prio<0)return;
+	registerType(target);
+	Private::CastFunc_s cf(prio);
+	cf.cfunc=castfunc;
+	cf.origin=origin;
+	cf.target=target;
+	d->casts.append(cf);
+}
+
+QVariant Engine::autoCast(const QVariant& v)const
+{
+	//check for primary
+	int vid=v.userType();
+	if(d->primtypes.contains(vid))
+		return v;
+	//find matching cast
+	int prio=-1;int pos=-1;
+	for(int i=0;i<d->casts.size();i++){
+		if(!d->casts[i].origin.contains(vid))continue;
+		if(prio<d->casts[i].prio){
+			pos=i;
+			prio=d->casts[i].prio;
+		}
+	}
+	//found it?
+	if(pos<0)return v;
+	else return d->casts[pos].cfunc(v);
 }
 
 

@@ -112,6 +112,7 @@ int FloatEngine::floatLowParserPrio()
 	return 10;
 }
 
+static QVariant fltCast(const QVariant&v){return v.toDouble();}
 
 void FloatEngine::configureFloatEngine(ELAM::Engine& eng)
 {
@@ -119,6 +120,7 @@ void FloatEngine::configureFloatEngine(ELAM::Engine& eng)
 	eng.setLiteralParser(floatLiteralParser2,"0123456789.",floatLowParserPrio());
 	int fid=QVariant::Double;
 	int iid=QVariant::LongLong;
+	eng.setAutoCast(fid, QList<int>()<<QVariant::Int<<QVariant::LongLong<<QVariant::UInt<<QVariant::ULongLong, fltCast, 30);
 	//unary
 	eng.unaryOperator("-").setCallback(floatMinus,fid);
 	eng.unaryOperator("+").setCallback(floatPlus,fid);

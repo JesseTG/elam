@@ -45,6 +45,7 @@ static QVariant boolXor(const QVariant&o1,const QVariant&o2)
 	return o1.toBool()^o2.toBool();
 }
 
+QVariant boolCast(const QVariant&v){return v.toBool();}
 
 void BoolEngine::configureBoolEngine(Engine&eng)
 {
@@ -52,6 +53,7 @@ void BoolEngine::configureBoolEngine(Engine&eng)
 	int bid=QVariant::Bool;
 	//cast
 	eng.setFunction("bool",boolFunc);
+	eng.setAutoCast(bid, QList<int>()<<QVariant::Int<<QVariant::UInt <<QVariant::LongLong<<QVariant::ULongLong <<QVariant::Char<<QVariant::String, boolCast, 20);
 	//constants
 	eng.setConstant("null",QVariant());
 	eng.setConstant("true",true);
