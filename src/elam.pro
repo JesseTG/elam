@@ -19,7 +19,8 @@ HEADERS += \
 	elamvalue.h \
 	elamintengine.h \
 	elamfloatengine.h \
-	elamboolengine.h
+	elamboolengine.h \
+	elamstringengine.h
 
 SOURCES += \
 	elamvalue.cpp \
@@ -30,7 +31,8 @@ SOURCES += \
 	elamintengine.cpp \
 	elamexpression.cpp \
 	elamfloatengine.cpp \
-	elamboolengine.cpp
+	elamboolengine.cpp \
+	elamstringengine.cpp
 
 INCLUDEPATH += .
 DEPENDPATH += .

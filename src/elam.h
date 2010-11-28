@@ -10,6 +10,7 @@
 #include "elamintengine.h"
 #include "elamfloatengine.h"
 #include "elamboolengine.h"
+#include "elamstringengine.h"
 
 /** \mainpage ELAM - Elementary Logic and Arithmetic Machine
 

@@ -6,4 +6,5 @@ class ElamTest:public QObject
 	private slots:
 		void charClass();
 		void tokenizer();
+		void stringLiteral();
 };

@@ -98,5 +98,21 @@ void ElamTest::tokenizer()
 	QCOMPARE(tl[14].type(),Token::ParClose);//)
 }
 
+void ElamTest::stringLiteral()
+{
+	StringEngine se;
+	IntEngine::configureIntEngine(se);
+	QList<Token>tl=se.tokenize("\"\\0123\\u12abcd\"");
+	QString v=QString("\012")+"3"+QChar(0x12ab)+QString("cd");
+	QCOMPARE(tl.size(),1);
+	QCOMPARE(tl[0].isLiteral(),true);
+	QString l=tl[0].literalValue().toString();
+// 	qDebug()<<"v="<<v<<"l="<<l;
+	QCOMPARE(v,l);
+	QCOMPARE(se.evaluate("strlen(\"abc\")").toInt(),3);
+	QVariant v2=se.evaluate("concat(\"abc\",12)");
+	QCOMPARE(v2.toString(),QString("abc12"));
+}
+
 
 QTEST_MAIN(ElamTest)
