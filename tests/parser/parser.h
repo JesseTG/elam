@@ -7,4 +7,5 @@ class ElamTest:public QObject
 		void charClass();
 		void tokenizer();
 		void stringLiteral();
+		void emptyList();
 };
