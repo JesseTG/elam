@@ -9,6 +9,12 @@
 using namespace ELAM;
 
 
+void ElamTest::emptytest()
+{
+	QVariant v=Engine().evaluate("");
+	QCOMPARE(v.userType(),Exception::metaTypeId());
+}
+
 void ElamTest::evaltest()
 {
 	IntEngine ie;

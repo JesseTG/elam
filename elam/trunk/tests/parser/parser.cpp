@@ -114,5 +114,13 @@ void ElamTest::stringLiteral()
 	QCOMPARE(v2.toString(),QString("abc12"));
 }
 
+void ElamTest::emptyList()
+{
+	IntEngine ie;
+	QList<Token>tl=ie.tokenize("");
+	QCOMPARE(tl.size(),0);
+	tl=ie.tokenize(" \t\n");
+	QCOMPARE(tl.size(),0);
+}
 
 QTEST_MAIN(ElamTest)
