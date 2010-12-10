@@ -158,6 +158,7 @@ inline QList<Token>Expression::simplifyTokens(QList<Token> toks)
 {
 	QList<Token>ret;
 	int min=0,max=toks.size()-1;
+	if(max<min)return ret;
 	//eliminate redundant parentheses
 	while(toks[min].type()==Token::ParOpen && toks[max].type()==Token::ParClose){
 		min++;max--;
