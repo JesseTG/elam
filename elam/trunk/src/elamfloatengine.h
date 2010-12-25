@@ -1,4 +1,4 @@
-//ELAM integer engine header
+//ELAM floating point engine header
 //
 // (c) Konrad Rosenbaum, 2010
 // protected under the GNU LGPL v3 or at your option any newer
