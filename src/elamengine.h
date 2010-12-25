@@ -115,6 +115,17 @@ class Engine:public QObject
 		/**performs automatic casting
 		\returns the casted value or the original value if it is of a primary type or if there is no known cast for it*/
 		Q_INVOKABLE QVariant autoCast(const QVariant&)const;
+		
+		///returns the names of all currently existing variables
+		Q_INVOKABLE QStringList variableNames()const;
+		///returns the names of all currently existing constants
+		Q_INVOKABLE QStringList constantNames()const;
+		///returns the names of all currently existing functions
+		Q_INVOKABLE QStringList functionNames()const;
+		///returns the names of all currently existing binary operators
+		Q_INVOKABLE QStringList binaryOperatorNames()const;
+		///returns the names of all currently existing unary operators
+		Q_INVOKABLE QStringList unaryOperatorNames()const;
 
 	public slots:
 		///returns the value of the named variable or constant
