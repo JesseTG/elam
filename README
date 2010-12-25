@@ -4,10 +4,8 @@ README for ELAM
 ELAM = Elementary Logic and Arithmetic Machine
 
 (c) Konrad Rosenbaum, 2010
-protected under the GNU GPL version 3 or at your option any newer
-see COPYING for details
-
-Hint: I really mean GPL, not LGPL. You can't use this library in proprietary code!
+protected under the GNU LGPL version 3 or at your option any newer
+see COPYING(.LGPL) for details
 
 This engine can be fed simple arithmetic formulas and will calculate their
 result, similar to those used in languages like C or Pascal. It is not able

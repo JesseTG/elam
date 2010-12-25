@@ -1,4 +1,4 @@
-// ELAM int engine definition implementation
+// ELAM floating point engine definition implementation
 //
 // (c) Konrad Rosenbaum, 2010
 // protected under the GNU LGPL v3 or at your option any newer

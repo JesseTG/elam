@@ -1,3 +1,8 @@
+//ELAM expression implementation
+//
+// (c) Konrad Rosenbaum, 2010
+// protected under the GNU LGPL v3 or at your option any newer
+
 #include "elamexpression.h"
 
 #include <QDebug>

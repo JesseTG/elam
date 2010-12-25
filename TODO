@@ -5,7 +5,6 @@ TODO for ELAM
 Engine
 ---------
 
-* Expression ordering and execution
 * function overloading
 
 Default Library
@@ -14,7 +13,3 @@ Default Library
 int: abs(...)
 
 float: abs, round, comparison operators
-
-bool
-
-string
