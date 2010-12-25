@@ -409,6 +409,30 @@ QVariant Engine::autoCast(const QVariant& v)const
 	else return d->casts[pos].cfunc(v);
 }
 
+QStringList Engine::binaryOperatorNames() const
+{
+	return d->binary.keys();
+}
+
+QStringList Engine::constantNames() const
+{
+	return d->consts.keys();
+}
+
+QStringList Engine::functionNames() const
+{
+	return d->funcs.keys();
+}
+
+QStringList Engine::unaryOperatorNames() const
+{
+	return d->unary.keys();
+}
+
+QStringList Engine::variableNames() const
+{
+	return d->vars.keys();
+}
 
 //end of namespace
 };
