@@ -64,20 +64,18 @@ Constants are variables that have been marked as immutable, they can be of any t
 
 There are two types of operators: unary and binary.<p>
 
-Unary operator precede an expression and change it, returning the result. For example the unary "-" operator in the default library negates its numeric argument (e.g. if "a" is 12, then "-a" returns -12).<p>
+Unary operators precede an expression and change it, returning the result. For example the unary "-" operator in the default library negates its numeric argument (e.g. if "a" is 12, then "-a" returns -12).<p>
 
 Binary operators operate on two expressions, one to the left and one to the right of the operator.<p>
 
-If operators follow each other (e.g. "a&nbsp;+|&nbsp;-b") then the operators must be separated by spaces.<p>
+If operators follow each other (e.g. "a&nbsp;!=&nbsp;-b") then the operators must be separated by spaces.<p>
 
 Parentheses group operations and may alter the order in which they are executed. Parentheses are evaluated before any other operation.<p>
-
-The equals sign ("=") has a special meaning when used in operators. In the normal mode the direct assignment operator "=" cannot be overloaded with a user specific function. If an operator ends in "=" and there is no overloaded operator, then the remainder is interpreted as a binary operator and the result assigned to the left side of the operator, for example "a+=b" is interpreted as a short form of "a=a+b".
 
 <a name="oper_prece"/>
 <h3>Operator Precedence</h3>
 
-Operators are interpreted in a specific order of precedence. First the highest precedence operators are evaluated, then the next lower precedence level, etc. with assignments being executed last. Consecutive operations with the same precedence level are executed from left to right.<p>
+Operators are interpreted in a specific order of precedence. First the highest precedence operators are evaluated, then the next lower precedence level, etc. with assignments being executed last. Consecutive binary operations with the same precedence level are executed from left to right. Consecutive unary operations are executed from right (nearest to the argument of the operator) to left (farthest to the argument).<p>
 
 The default library has the following precedence order:
 
@@ -107,7 +105,23 @@ This means for example that in "a=9+1+2*(3-1)" these operations are executed in 
 <li>"9+1" yields "10"
 <li>"10+4" yields "14"
 <li>the variable "a" is assigned the value "14"
+<li>the expression returns the result of the last operation (the assignment) to the calling context
 </ol>
+
+<h2>Parentheses</h2>
+
+Parentheses are used to change the order in which operations are executed by grouping part of the expression into a unit that is calculated before the remaining operation surrounding it is executed. Inside the parentheses the normal precedence order applies again.<p>
+
+For example: in "2*(3-1*5)/4" the expression "3-1*5" inside the parentheses is resolved before the remaining multiplication and division around it are executed. While calculating the content of the parentheses the normal precedence applies, so the multiplication is executed before the subtraction.
+
+<h2>Assignments</h2>
+
+The equals sign ("=") has a special meaning when used in operators. In the normal mode the direct assignment operator "=" cannot be overloaded with a user specific function. If an operator ends in "=" and there is no overloaded operator, then the remainder is interpreted as a binary operator and the result assigned to the left side of the operator, for example "a+=b" is interpreted as a short form of "a=a+b".<p>
+
+In other words: if ELAM encounters an operator that equals its notion of the assignment operator (normally "="), then it is always interpreted as assignment - even if another operator with the same name exists. If ELAM encounters an operator that contains the assignment syntax (normally: one that ends in "="), then it first checks whether there is a more specific operator (above, e.g. "==") and uses it if found, if there is none, then it checks whether this could be a compound operation  (e.g. "+=", which first adds and then assigns the result back to the left argument).<p>
+
+Assignment syntax can be changed by changing the character class for the assignment operator.
+
 
 <h2>Functions</h2>
 
@@ -118,7 +132,7 @@ The default library knows the following functions:
 <tr><td>Function<td>Description</tr>
 <tr><td>int(value)<td>converts value to integer, rounding towards zero</tr>
 <tr><td>float(value)<td>converts value to a floating point number</tr>
-<tr><td>str(value)<td>converts value to string</tr>
+<tr><td>string(value)<td>converts value to string</tr>
 <tr><td>concat(v1,v2,...)<td>concatenates strings</tr>
 </table>
 
@@ -140,7 +154,7 @@ The "special" characters are those with a specific built-in meaning to the parse
 <table border="1" frame="1">
 <tr><td>Characters<td>Description<td>Rules</tr>
 <tr><td>Parentheses "(", ")"<td>change the order of evaluation by grouping the inner operations to be performed before the outer operations, or by enclosing the arguments of a function<td>the two parentheses characters must differ and must not match any other class</tr>
-<tr><td>Comma ","<td>separated the arguments of a function<td>single character that must not be contained in any other class</tr>
+<tr><td>Comma ","<td>separates the arguments of a function<td>single character that must not be contained in any other class</tr>
 <tr><td>Equals "="<td>denotes assignments, the character itself cannot be overridden as operator, combinations with other operators can be overridden<td>one or two characters: prefix and postfix, they must differ, they both must be part of the operator class</tr>
 </table><p>
 

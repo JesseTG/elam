@@ -147,9 +147,10 @@ class Engine:public QObject
 		///deletes a variable or constant
 		void removeValue(QString);
 		
-		/**sets the function
+		/**Sets a new function for a specific function name.
+		If there already is a function of that name it is overridden.
 		\returns true on success or false if:
-		 - the name is not valid
+		 - the name is not syntactically valid
 		 - the function is null
 		 - a constant or variable of the same name exists already*/
 		bool setFunction(QString,Function);
