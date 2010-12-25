@@ -1,11 +1,51 @@
 <html>
-<title>ELAM</title>
+<title>ELAM Library</title>
+<style type="text/css">
+pre {left-margin:20px; background-color: #e0e0ff; border-style: dotted; border-width:thin;}
+</style>
 <body>
 <h1>Using The ELAM Libray</h1>
 
 <h2>Project File and Includes</h2>
 
-<h2>Calling It</h2>
+Add a few simple lines to your qmake project file:
+<pre>
+ELAMPATH=.../path.to/elam
+LIBS += -L$ELAMPATH -lelam
+INCLUDEPATH += $ELAMPATH/src
+CONFIG += link_prl
+</pre>
+
+Replace the ELAMPATH variable with the correct path to your installation of ELAM. The link_prl flag will make sure that all required libraries are linked in - the information is stored in the libelam.prl file that is generated when ELAM is compiled.<p>
+
+In the source files that use ELAM, simply add this line:
+<pre>
+#include &lt;elam.h>
+</pre>
+
+This wrapper include file loads all interfaces defined in ELAM.
+
+<h2>Getting Started</h2>
+
+You need an instance of ELAM::Engine or one of its child classes as the central instance to execute formulas. The engine is configured with the operations it needs to be able to perform. The engine will then keep track of variables and constants as they are changed by ongoing calculations. The following code represents a very simple example:
+<pre>
+<i> 1:</i> ELAM::IntEngine engine;
+<i> 2:</i> ELAM::FloatEngine::configureFloatEngine(engine);
+<i> 3:</i> engine.setConstant("mypi",QVariant((qreal)3.14159));
+<i> 4:</i> QVariant result=engine.evaluate("myvar=2.67*mypi");
+<i> 5:</i> qDebug()&lt;&lt;"my result:"&lt;&lt;result.toReal();
+<i> 6:</i> qDebug()&lt;&lt;"my variable:"&lt;&lt;engine.getValue("myvar").toReal();
+</pre>
+
+<ul>
+<li>Line 1 instantiates the engine, this uses one of the predefined convenience engines - it is identical to ELAM::Engine, but comes preconfigured with the default library's integer arithmatics. 
+<li>Line 2 extends this engine with the default library's floating point arithmatics. 
+<li>Line 3 sets a constant - constants cannot be changed by formulas, but can be overridden or removed by C++ code. 
+<li>Line 4 lets the engine calculate an expression - in this case the expression calculates the result of 2.67 times the constant "mypi", then assigns the result to the variable "myvar"; the same value is then also returned and stored in the QVariant "result".
+<li>Lines 5 and 6 output the results.
+</ul><p>
+
+The ELAM::Engine class provides more possibilities, like caching compiled expressions, changing operator precedence, etc. Please see below and the <a href="source/index.html">source docu</a> for more details.<p>
 
 <h2>Default Libray</h2>
 
@@ -15,7 +55,7 @@ The type "any" is used below to denote any type that is supported by the current
 <table frame="1" border="1">
 <tr><td><b>ELAM type</b></td><td><b>QVariant</b></td><td><b>Description</b></td></tr>
 
-<tr><td>any</td><td>ELAM::AnyType</td><td>cannot be used directly, but tells the engine that any type is allowed</td></tr>
+<tr><td>any</td><td>ELAM::AnyType</td><td>cannot be used directly, but tells the engine that any other type (that is registered with QVariant and the engine) is allowed</td></tr>
 
 <tr><td>exception</td><td>ELAM::Exception</td><td>thrown when something goes wrong (parser errors, syntactic errors, operational/conversion errors</td></tr>
 
@@ -44,7 +84,11 @@ The integer library defines some very basic integer functionality:
 <tr><td>+ int</td><td>returns the value as is</td></tr>
 <tr><td>- int</td><td>returns the integer negative of the number</td></tr>
 <tr><td>~ int</td><td>returns the bitwise negative of the integers</td></tr>
-</table>
+</table><p>
+
+Integer literals follow the same rules as C-language int literals - they can be expressed as decimals (e.g. 123, -987), octal numbers (starting with "0", e.g. 0123), or hexa-decimal numbers (starting with "0x", e.g. 0x12abCD).<p>
+
+Use the convenience class ELAM::IntEngine or its static method configureIntEngine to get this functionality into an engine.
 
 <h3>Floating Point Library</h3>
 
@@ -58,18 +102,293 @@ The floating point library defines some very basic floating point functionality:
 <tr><td>float / float</td><td>divides two floating points</td></tr>
 <tr><td>+ float</td><td>returns the value as is</td></tr>
 <tr><td>- float</td><td>returns the floating point negative of the number</td></tr>
-</table>
+</table><p>
 
-<h2>Basic Types, Operators, Functions and Variables</h2>
+Floating point literals are expressed as positive or negative decimal numbers that contain a dot and an optional exponent (e.g. 12.34, 12., .56, 12.0e3, 1e-9). If the literal does not contain a dot or exponent the engine falls back to the integer parser.<p>
+
+Use the convenience class ELAM::FloatEngine or its static method configureFloatEngine to get this functionality into an engine. It is recommended to also load the integer library, even if pure integer calculations are rare in your application.
+
+<h3>Boolean Library</h3>
+
+This library defines three constants:
+<ul>
+<li>"null" - a QVariant null value that can be used for comparisons
+<li>"true" - a boolean true value
+<li>"false" - a boolean false value
+</ul>
+These constants are meant to be used as literals for boolean values.<p>
+
+The boolean library defines some very basic logic operator functionality:
+<table frame="1" border="1">
+<tr><td><b>Function</b></td><td><b>Description</b></td></tr>
+<tr><td>bool(any)</td><td>tries to convert the argument to boolean (see the documentation of QVariant for details)</td><tr>
+<tr><td>bool &amp; bool</td><td>results in true if both arguments are true</td></tr>
+<tr><td>bool &amp;&amp; bool</td><td>results in true if both arguments are true</td></tr>
+<tr><td>bool | bool</td><td>results in true if any of the arguments is true</td></tr>
+<tr><td>bool || bool</td><td>results in true if any of the arguments is true</td></tr>
+<tr><td>bool ^ bool</td><td>results in true if exactly one of the arguments is true and the other false</td></tr>
+<tr><td>bool ^^ bool</td><td>results in true if exactly one of the arguments is true and the other false</td></tr>
+<tr><td>! bool</td><td>negates the boolean value</td></tr>
+<tr><td>! int</td><td>converts the int to bool, then negates the boolean value</td></tr>
+<tr><td>~ bool</td><td>negates the boolean value</td></tr>
+</table>
+In all binary operators above you can substitute one of the boolean arguments with an integer argument: it will first be converted to boolean before the operation is than executed. The &amp;&amp;, ||, and ^^ operators convert any integer arguments to boolean.<p>
+
+Some basic logic functions are also defined:
+<table frame="1" border="1">
+<tr><td><b>Function</b></td><td><b>Description</b></td></tr>
+<tr><td>if(bool,any[,any])</td><td>tries to interpret the first argument as boolean, if it is true it returns the second argument, if it is false it returns the third or if there is no third argument it returns null<br/>Note: all three arguments are executed regardless of which one is returned by the function - this function cannot be used for conditional execution</td><tr>
+<tr><td>isNull(any)</td><td>returns true if the argument is null, false otherwise</td></tr>
+<tr><td>isException(any)</td><td>returns true if the argument evaluates to an exception (e.g. because a non-existing constant/variable/function is used)</td></tr>
+<tr><td>isExceptionOrNull(any)</td><td>returns true if the argument is an exception or null</td></tr>
+<tr><td>catch(any[,any[,any]])</td><td>returns the second argument or true if the first argument evaluates to an exception, returns the third argument or false otherwise - this function is equivalent to isException if it is called with only one argument</td></tr>
+</table>
+<p>
+
+Use the convenience type ELAM::BoolEngine or its methods configureBoolEngine and configureLogicEngine to get this functionality.
+
+<h3>String Library</h3>
+
+The string library defines some very basic character string functionality:
+<table frame="1" border="1">
+<tr><td><b>Function</b></td><td><b>Description</b></td></tr>
+<tr><td>string(any)</td><td>tries to convert the argument to string (see the documentation of QVariant for details)</td><tr>
+<tr><td>strlen(string)</td><td>returns the length of the string in characters</td></tr>
+<tr><td>concat(...)</td><td>takes any number of arguments and returns one string that is the concatenation of all arguments</td></tr>
+<tr><td>string + string</td><td>concatenates the two arguments (any of them may also be of a non-string type that is convertible to string)</td></tr>
+</table><p>
+
+String literals start either with single quotes (') or double quotes (") and end with the same type of quote. Special characters can be escaped with backslash (\):
+<table frame="1" border="1">
+<tr><td><b>Syntax</b></td><td><b>Translation after parsing</b></td></tr>
+<tr><td>\\</td><td>single backslash</td><tr>
+<tr><td>\n</td><td>newline</td><tr>
+<tr><td>\r</td><td>carriage return</td><tr>
+<tr><td>\t</td><td>horizontal tab</td><tr>
+<tr><td>\v</td><td>vertical tab</td><tr>
+<tr><td>\b</td><td>backspace</td><tr>
+<tr><td>\f</td><td>form feed</td><tr>
+<tr><td>\a</td><td>alert (BEL)</td><tr>
+<tr><td>\'</td><td>single quote</td><tr>
+<tr><td>\"</td><td>double quote</td><tr>
+<tr><td>\<i>ooo</i></td><td>up to three octal digits that represent the ASCII value of the desired character</td><tr>
+<tr><td>\x<i>hh</i></td><td>up to two hexadecimal digits that represent the ASCII value of the desired character</td><tr>
+<tr><td>\u<i>hhhh</i></td><td>exactly four hexadecimal digits that represent the 16-bit unicode value of the desired unicode character</td><tr>
+<tr><td>\U<i>hhhhhhhh</i></td><td>exactly eight hexadecimal digits that represent the 32-bit unicode value of the desired unicode character</td><tr>
+</table><p>
+
+Examples include: "hello World!", 'hello World!', 'line\r\nbreak'.<p>
+
+Use the convenience type ELAM::StringEngine or its static method configureStringEngine to get this functionality.
+
 
 <h1>Extending The ELAM Libray</h1>
 
-<h2>Redirecting Variables and Constants</h2>
+This section describes how to extend ELAM to suit your own needs above and beyond what the default library provides.<p>
 
-<h2>Creating new Operators</h2>
+Please read the <a href="syntax.html">syntax</a> document for basic concepts of ELAM.
+
+<h2>Changing Variables and Constants</h2>
+
+The Engine keeps track of constants and variables while it operates. You can query and set them arbitrarily:
+<pre>
+ELAM::IntEngine engine;
+//set variable:
+engine.setVariable("myvar",(qlonglong)123);
+//get variable
+qDebug()&lt;&lt;engine.getVariable("myvar");
+//set constant
+engine.setConstant("myconst",(qlonglong)123);
+//remove constant
+engine.removeConstant("myconst");
+</pre>
+
+When setting a variable or constant it should be of a type that is either registered as a primary type or that can be automatically cast into a primary type. Otherwise you will not be able to use the new value with most expressions.
+
+<h2>Types and Automatic Casts</h2>
+
+When you extend the library with new types of values you have to register the new type using the registerType or setAutoCast methods. Since ELAM uses QVariant as its basic type to represent values your new type must be registered with QVariant, e.g.:
+<pre>
+class MyNewType{
+ public:
+  MyNewType();
+  MyNewType(int);
+  MyNewType(qreal);
+...
+  QString toString()const;
+};
+Q_DECLARE_METATYPE(MyNewType);
+qRegisterMetaType&lt;MyNewType>();
+</pre>
+
+You then need to register the type at the Engine to make sure it is handled as a primary type and not cast into another type that is registered with an auto-cast for this type:
+<pre>
+ELAM::Engine engine;
+engine.registerType(QMetaType::type("MyNewType"));
+</pre>
+
+If your type can be cast from other frequently used types it is advisable to register an auto-cast for those types:
+<pre>
+<i>//The cast function...</i>
+static QVariant myNewTypeCast(const QVariant&amp;orig)
+{
+  <i>//The type of the original and our reaction to it</i>
+  switch(orig.type()){
+    case QVariant::Int:
+    case QVariant::LongLong:
+    case QVariant::UInt:
+    case QVariant::ULongLong:
+      return MyNewType(orig.toInt());
+    case QVariant:Double:
+      return MyNewType(orig.toDouble());
+    <i>//if the type is not known, do not attempt to cast</i>
+    default:
+      return orig;
+  }
+}
+...
+engine.setAutoCast(
+<i>  //my new target type</i>
+  QMetaType::type("MyNewType"),
+<i>  //the source types it can be cast from</i>
+  QList&lt;int>()&lt;&lt;QVariant::Int&lt;&lt;QVariant::LongLong
+                 &lt;&lt;QVariant::UInt&lt;&lt;QVariant::ULongLong
+                 &lt;&lt;QVariant::Double,
+<i>  //the function that actually casts</i>
+  myNewTypeCast,
+<i>  //priority at which the cast works in case of conflicts</i>
+  50 );
+</pre>
+<p>
+
+Any time that ELAM tries to feed a value into an operator, an assignment, or a function it checks its internal database of registered types and casts. If the type of the value is a primary type then it is left along, regardless of any existing casts. If the type is not primary, then the registered auto casts are searched and the one with the highest priority for this source type is executed. Casts are never chained - each time only one cast is executed, if it does not yield a usable type for the function or operator, then an exception is generated.
 
 <h2>Creating new Functions</h2>
 
-<h2>Creating new Types</h2>
+Functions can execute any operation on any amount of arguments. Only one function with the same name can exist at any time in an engine. The function is handed any arguments that exist when it is called, the implementation of the function has to check itself whether those arguments are correct. A very trivial example is this:
+<pre>
+static QVariant myFunction(const QList&lt;QVariant>&amp;args)
+{
+  return args.size();
+}
+...
+engine.setFunction("myfunc",myFunction);
+qDebug()&lt;&lt;engine.evaluate("myfunc(1,2,3,myFunc(4,5,6,7))");
+</pre>
+The example above implements a function that returns the number of arguments that it is handed by the engine. The expression will then yield the value QVariant(4) - the outer function gets exactly four arguments ("1", "2", "3", and the result of the inner function).<p>
+
+More complex functions have to check for types and the number of arguments, for example converting the type defined above into a string could be done like this:
+<pre>
+static QVariant myNewTypeToString(const QList&lt;QVariant>&amp;args)
+{
+  if(args.size()!=1)
+    return ELAM::Exception(ELAM::Exception::ArgumentListError,"Expected one argument.");
+  if(!args[0].canConvert&lt;MyNewType>())
+    return ELAM::Exception(ELAM::Exception::TypeMismatchError,"Expected argument of MyNewType.");
+  return args[0].value&lt;MyNewType>().toString();
+}
+...
+engine.setFunction("mytype2string",myNewTypeToString);
+</pre>
+
+<h2>Creating new Literals</h2>
+
+With many types it is desireable to have a way of expressing values of that type directly in expressions instead of relying on outside values or conversions from other types. A literal has two registered properties: a parser function and a list of start characters. The engine has a class of literal start characters. When a character is encountered that is part of the literal start character class, then the engine looks for a parser whose configuration contains this character. The matching parsers are tried out in order of descending priority until one of them returns a result.<p>
+
+A parser function gets the expression that is being parsed as well as some context (engine and start character position) as arguments. If it finds a match for its internal syntax it should return the resulting value and the part of the expression that it accepted, if it does not find a perfect match it should assume that another parser will match and return an empty result.<p>
+
+Let's assume that we allow users to define MyNewType literals as integers in curly braces (e.g. {123}):
+
+<pre>
+QPair&lt;QString,QVariant> myParser(const QString&amp;expr,Engine&amp;engine,int start)
+{
+  <i>//check start character</i>
+  if(expr[start]!='{')return QPair&lt;QString,QVariant>();
+  <i>//search for end character</i>
+  QString strval;bool found=false;
+  for(int i=start+1;i&lt;expr.size();i++){
+    <i>//check for end character</i>
+    if(expr[i]=='}'){
+      found=true;
+      break;
+    }
+    <i>//copy character</i>
+    strval+=expr[i];
+  }
+  <i>//if the character was not found: abort</i>
+  if(!found)return QPair&lt;QString,QVariant>();
+  <i>//convert and check syntax</i>
+  bool ok;
+  int intval=strval.toInt(&amp;ok);
+  if(ok)
+    return QPair&lt;QString,QVariant>(
+      "{"+strval+"}",
+      QVariant::fromValue(MyNewType(intval)));
+  else
+    return QPair&lt;QString,QVariant>();
+}
+<i>//make sure our start character is registered</i>
+ChracterClassSettings &amp;charclass=engine.characterClasses();
+charclass.setLiteralStartClass(charclass.literalStartClass()+"{");
+<i>//register the parser</i>
+engine.setLiteralParser(myParser,"{",50);
+<i>//test the parser</i>
+qDebug()&lt;&lt;engine.evaluate("mytype2string({123})");
+</pre>
+
+The example function above first searches for matching curly braces, then tries to convert the content to MyNewType and returns the complete literal expression (the loop leaves out the braces, hence they must be re-added) and the resulting value. If it fails at any stage it returns an empty result, so that the engine will continue to search for a matching parser.<p>
+
+The lines below the function make sure the opening curly brace is recognized as a start character by the engine and registers the parser function with that start character at standard priority (50). The last line tests the literal parser and converts the result to a string (using the function from the sub-section above).
+
+<h2>Creating new Operators</h2>
+
+Other than functions operators can be overloaded with different handlers for different argument types. The downside of this is that every combination of primary types that an operator can handle has to be registered at the engine.<p>
+
+The ELAM::UnaryOperator and ELAM::BinaryOperator classes are used internally to track the handlers and types of operators. Instances of those classes are created implicitly when calling the unaryOperator and binaryOperator methods of ELAM::Engine.
+
+<h3>Unary Operators</h3>
+
+Let's define the unary "*" operator (as the square of its argument) for ELAM::IntEngine, this means we have to get the operator instance for this operator from the engine and add a handler for qlonglong (which is used as generic integer by the library):
+
+<pre>
+static QVariant mySquareOperator(const QVariant&amp;op)
+{
+  qlonglong value=op.toLongLong();
+  return value*value;
+}
+...
+ELAM::IntEngine engine;
+engine.unaryOperator("*").setCallback(mySquareOperator,QVariant::LongLong);
+qDebug()&lt;&lt;engine.evaluate("2 * *3");
+</pre>
+
+The operator handler function is rather simple - it just assumes that it is only called with qlonglong arguments (a fair assumption if it is never registered for another type), and then multiplies that argument with itself. It is then registered for the qlonglong type.<p>
+
+The last line tests the operator - it multiplies 2 with the square of 3 (9), the result should ve a QVariant representing the qlonglong value 18. This also shows that the same name can be used for unary and binary operators - the position relative to the argument(s) decides which one is used: in a series of operators between two expressions the left most is always assumed to be binary and all others are assumed to be unary, if there is no expression to the left then all operators are assumed to be unary.
+
+<h3>Binary Operators</h3>
+
+Binary operators are slightly more complex: they have a precedence and two arguments instead of one.
+
+<pre>
+static QVariant myDivOperator(const QVariant&amp;op1,const QVariant&amp;op2)
+{
+  return op1.toDouble()/op2.toDouble();
+}
+...
+ELAM::IntFloatEngine engine;
+ELAM::BinaryOperator &amp;binop=engine.binaryOperator("//",90);
+binop.setCallback(myDivOperator,QVariant::LongLong,QVariant::LongLong);
+binop.setCallback(myDivOperator,QVariant::LongLong,QVariant::Double);
+binop.setCallback(myDivOperator,QVariant::Double,QVariant::LongLong);
+binop.setCallback(myDivOperator,QVariant::Double,QVariant::Double);
+qDebug()&lt;&lt;engine.evaluate("2 // 3");
+</pre>
+
+The function above is again trivial - it converts both arguments to qreal and then divides. The function is registered for all combinations of integer and floating point numbers - both qlonglong and qreal can be readily converted to qreal by QVariant.<p>
+
+The priority that is given here registers the operator at the same level as all other multiplicative operators in the default library. Normally if an operator already exists the priority remains unchanged - regardless of whether it matches or not. This behavior can be changed with the optional third argument to this method.<p>
+
+The last line should return a QVariant representing the qreal 0.6666666...
 
 </html>
