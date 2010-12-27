@@ -20,16 +20,19 @@
 namespace ELAM {
 
 
+class Engine;
+
 /**pointer to a function wrapping a mathematical function
 \param args the list of arguments
 \returns the result of the function or ELAM::Exception in case or errors
 
 Functions must check their arguments for validity before they start calculating. On error a function should returns an ELAM::Exception.
+
+\param args the list of arguments that was given to the function, the implementation must check for length and type of the arguments
+\param engine the engine calling the function
 */
-typedef QVariant (*Function)(const QList<QVariant>&args);
+typedef QVariant (*Function)(const QList<QVariant>&args,Engine&engine);
 
-
-class Engine;
 
 /**wraps the parser routine for a literal
 \param expr the original expression string
@@ -45,8 +48,9 @@ typedef QPair<QString,QVariant> (*LiteralParser)(const QString&expr,Engine&engin
 
 /**Wraps a cast function to convert various types into another type.
 \param orig the original value of any type
-\returns the converted value that must conform to the expected type*/
-typedef QVariant (*TypeCast)(const QVariant&orig);
+\param engine the engine calling the cast
+\returns the converted value that conforms to the expected type*/
+typedef QVariant (*TypeCast)(const QVariant&orig,const Engine&engine);
 
 /**The calculation engine of .
 
@@ -63,11 +67,12 @@ class Engine:public QObject
 		Engine(QObject*parent=0);
 		
 		///true if the named variable exists in this engine
-		Q_INVOKABLE bool hasVariable(QString)const;
+		Q_INVOKABLE virtual bool hasVariable(QString)const;
 		///true if the named constant exists in this engine
-		Q_INVOKABLE bool hasConstant(QString)const;
+		Q_INVOKABLE virtual bool hasConstant(QString)const;
 		///true if a variable or constant of that name exists in this engine
-		Q_INVOKABLE bool hasValue(QString)const;
+		///(default calls hasVariable() || hasConstant() )
+		Q_INVOKABLE virtual bool hasValue(QString)const;
 		
 		///returns true if the named function exists
 		Q_INVOKABLE bool hasFunction(QString)const;
@@ -117,9 +122,9 @@ class Engine:public QObject
 		Q_INVOKABLE QVariant autoCast(const QVariant&)const;
 		
 		///returns the names of all currently existing variables
-		Q_INVOKABLE QStringList variableNames()const;
+		Q_INVOKABLE virtual QStringList variableNames()const;
 		///returns the names of all currently existing constants
-		Q_INVOKABLE QStringList constantNames()const;
+		Q_INVOKABLE virtual QStringList constantNames()const;
 		///returns the names of all currently existing functions
 		Q_INVOKABLE QStringList functionNames()const;
 		///returns the names of all currently existing binary operators
@@ -129,11 +134,12 @@ class Engine:public QObject
 
 	public slots:
 		///returns the value of the named variable or constant
-		QVariant getValue(QString)const;
+		///(default uses getVariable/getConstant)
+		virtual QVariant getValue(QString)const;
 		///returns the value of the named variable (does not return constants)
-		QVariant getVariable(QString)const;
+		virtual QVariant getVariable(QString)const;
 		///returns the value of the named constant (does not return variables)
-		QVariant getConstant(QString)const;
+		virtual QVariant getConstant(QString)const;
 		
 		/**sets a variable
 		
@@ -141,7 +147,7 @@ class Engine:public QObject
 		 - the name is not valid
 		 - a function or constant of that name already exists
 		*/
-		bool setVariable(QString,QVariant);
+		virtual bool setVariable(QString,QVariant);
 		/**sets a constant
 		
 		\returns true on success or false if:
@@ -149,14 +155,15 @@ class Engine:public QObject
 		 - a function of that name exists
 		
 		Constants overwrite variables - if a variable of the same name exists, it is transparently deleted before the constant is created.*/
-		bool setConstant(QString,QVariant);
+		virtual bool setConstant(QString,QVariant);
 
-		///deletes a variable (does not affect constants)
-		void removeVariable(QString);
-		///deletes a constant (does not affect variables)
-		void removeConstant(QString);
+		///deletes a variable (does not affect constants, does nothing if the variable does not exist)
+		virtual void removeVariable(QString);
+		///deletes a constant (does not affect variables, does nothing if the constant does not exist)
+		virtual void removeConstant(QString);
 		///deletes a variable or constant
-		void removeValue(QString);
+		///(default uses removeVariable and removeConstant)
+		virtual void removeValue(QString);
 		
 		/**Sets a new function for a specific function name.
 		If there already is a function of that name it is overridden.

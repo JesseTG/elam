@@ -449,7 +449,7 @@ QVariant Expression::evalBinary()
 	//get operator
 	BinaryOperator binop=d->parent->binaryOperator(un);
 	//perform operation
-	QVariant r=binop.execute(sub1,sub2);
+	QVariant r=binop.execute(sub1,sub2,*(d->parent));
 	if(r.userType()==Exception::metaTypeId()){
 		ELAM::Exception ex=r;
 		if(!ex.position().isValid())
@@ -487,7 +487,7 @@ QVariant Expression::evalFunction()
 	for(int i=0;i<d->subexpr.size();i++)
 		args<<d->parent->autoCast(d->subexpr[i].evaluate());
 	//execute
-	return func(args);
+	return func(args,*(d->parent));
 }
 
 QVariant Expression::evalUnary()
@@ -504,7 +504,7 @@ QVariant Expression::evalUnary()
 	//get operator
 	UnaryOperator unop=d->parent->unaryOperator(un);
 	//perform operation
-	return unop.execute(sub);
+	return unop.execute(sub,*(d->parent));
 }
 
 

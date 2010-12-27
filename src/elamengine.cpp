@@ -163,8 +163,8 @@ QVariant Engine::getVariable(QString n) const
 
 QVariant Engine::getValue(QString n) const
 {
-	if(d->consts.contains(n))return d->consts[n];
-	if(d->vars.contains(n))return d->vars[n];
+	if(hasConstant(n))return getConstant(n);
+	if(hasVariable(n))return getVariable(n);
 	return QVariant();
 }
 
@@ -180,7 +180,7 @@ bool Engine::hasVariable(QString n) const
 
 bool Engine::hasValue(QString n) const
 {
-	return d->vars.contains(n) || d->consts.contains(n);
+	return hasVariable(n) || hasConstant(n);
 }
 
 void Engine::removeConstant(QString n)
@@ -195,15 +195,15 @@ void Engine::removeVariable(QString n)
 
 void Engine::removeValue(QString n)
 {
-	d->consts.remove(n);
-	d->vars.remove(n);
+	removeConstant(n);
+	removeVariable(n);
 }
 
 bool Engine::setConstant(QString n, QVariant v)
 {
 	if(!d->cclass.isName(n))return false;
 	if(d->funcs.contains(n))return false;
-	d->vars.remove(n);
+	removeVariable(n);
 	d->consts.insert(n,autoCast(v));
 	return true;
 }
@@ -211,7 +211,7 @@ bool Engine::setConstant(QString n, QVariant v)
 bool Engine::setVariable(QString n, QVariant v)
 {
 	if(!d->cclass.isName(n))return false;
-	if(d->consts.contains(n))return false;
+	if(hasConstant(n))return false;
 	if(d->funcs.contains(n))return false;
 	d->vars.insert(n,autoCast(v));
 	return true;
@@ -232,8 +232,8 @@ bool Engine::setFunction(QString n, ELAM::Function p)
 {
 	if(p==0)return false;
 	if(!d->cclass.isName(n))return false;
-	if(d->consts.contains(n))return false;
-	if(d->vars.contains(n))return false;
+	if(hasConstant(n))return false;
+	if(hasVariable(n))return false;
 	d->funcs.insert(n,p);
 	return true;
 }
@@ -406,7 +406,7 @@ QVariant Engine::autoCast(const QVariant& v)const
 	}
 	//found it?
 	if(pos<0)return v;
-	else return d->casts[pos].cfunc(v);
+	else return d->casts[pos].cfunc(v,*this);
 }
 
 QStringList Engine::binaryOperatorNames() const

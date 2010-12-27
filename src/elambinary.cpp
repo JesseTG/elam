@@ -40,7 +40,7 @@ BinaryOperator::~BinaryOperator()
 {
 }
 
-QVariant BinaryOperator::execute ( const QVariant&op1,const QVariant&op2 ) const
+QVariant BinaryOperator::execute ( const QVariant&op1,const QVariant&op2,Engine&eng) const
 {
 	//search for match
 	QPair<int,int>k(op1.userType(),op2.userType());
@@ -57,7 +57,7 @@ QVariant BinaryOperator::execute ( const QVariant&op1,const QVariant&op2 ) const
 	if(bc==0)
 		return Exception(Exception::TypeMismatchError, "operator cannot work on this type");
 	//execute
-	return bc(op1,op2);
+	return bc(op1,op2,eng);
 }
 
 BinaryOperatorCall BinaryOperator::getCallback ( QString type1, QString type2 ) const

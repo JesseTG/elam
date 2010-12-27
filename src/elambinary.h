@@ -13,12 +13,14 @@
 #include "dptr.h"
 
 namespace ELAM {
+class Engine;
 
 /** \brief pointer to a function wrapping a binary operator
 \param op1 the left operand
 \param op2 the right operand
+\param engine the engine calling the operator
 \returns the result of the operation*/
-typedef QVariant (*BinaryOperatorCall)(const QVariant&op1,const QVariant&op2);
+typedef QVariant (*BinaryOperatorCall)(const QVariant&op1,const QVariant&op2,Engine&engine);
 
 /** \brief Wraps a particular binary operator.
 
@@ -62,7 +64,7 @@ class BinaryOperator
 		QList<QPair<int,int> > getTypeIds()const;
 		
 		///calls the callback function associated with the type of the argument, throws an exception if there is no callback
-		QVariant execute(const QVariant&,const QVariant&)const;
+		QVariant execute(const QVariant&,const QVariant&,Engine&)const;
 		
 		///true if this operator has no callbacks
 		bool isNull()const;

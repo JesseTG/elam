@@ -16,7 +16,7 @@ BoolEngine::BoolEngine()
 }
 
 
-static QVariant boolFunc(const QList<QVariant>&lf)
+static QVariant boolFunc(const QList<QVariant>&lf,Engine&)
 {
 	if(lf.size()!=1)
 		return Exception(Exception::ArgumentListError, "expecting exactly one argument");
@@ -26,26 +26,26 @@ static QVariant boolFunc(const QList<QVariant>&lf)
 }
 
 //unary
-static QVariant boolNot(const QVariant&o)
+static QVariant boolNot(const QVariant&o,Engine&)
 {
 	return !o.toBool();
 }
 
 //bitwise
-static QVariant boolAnd(const QVariant&o1,const QVariant&o2)
+static QVariant boolAnd(const QVariant&o1,const QVariant&o2,Engine&)
 {
 	return o1.toBool()&&o2.toBool();
 }
-static QVariant boolOr(const QVariant&o1,const QVariant&o2)
+static QVariant boolOr(const QVariant&o1,const QVariant&o2,Engine&)
 {
 	return o1.toBool()||o2.toBool();
 }
-static QVariant boolXor(const QVariant&o1,const QVariant&o2)
+static QVariant boolXor(const QVariant&o1,const QVariant&o2,Engine&)
 {
 	return o1.toBool()^o2.toBool();
 }
 
-QVariant boolCast(const QVariant&v){return v.toBool();}
+QVariant boolCast(const QVariant&v,const Engine&){return v.toBool();}
 
 void BoolEngine::configureBoolEngine(Engine&eng)
 {
@@ -87,7 +87,7 @@ void BoolEngine::configureBoolEngine(Engine&eng)
 	eng.binaryOperator("^^",25).setCallback(boolXor,bid,bid);
 }
 
-static QVariant ifFunc(const QList<QVariant>&lf)
+static QVariant ifFunc(const QList<QVariant>&lf,Engine&)
 {
 	if(lf.size()<2 || lf.size()>3)
 		return Exception(Exception::ArgumentListError, "expecting 2 or 3 arguments");
@@ -100,28 +100,28 @@ static QVariant ifFunc(const QList<QVariant>&lf)
 		return QVariant();
 }
 
-static QVariant isNullFunc(const QList<QVariant>&lf)
+static QVariant isNullFunc(const QList<QVariant>&lf,Engine&)
 {
 	if(lf.size()!=1)
 		return Exception(Exception::ArgumentListError, "expecting exactly one argument");
 	return lf[0].isNull();
 }
 
-static QVariant isExceptionFunc(const QList<QVariant>&lf)
+static QVariant isExceptionFunc(const QList<QVariant>&lf,Engine&)
 {
 	if(lf.size()!=1)
 		return Exception(Exception::ArgumentListError, "expecting exactly one argument");
 	return lf[0].userType()==Exception::metaTypeId();
 }
 
-static QVariant isExceptionOrNullFunc(const QList<QVariant>&lf)
+static QVariant isExceptionOrNullFunc(const QList<QVariant>&lf,Engine&)
 {
 	if(lf.size()!=1)
 		return Exception(Exception::ArgumentListError, "expecting exactly one argument");
 	return lf[0].isNull() || lf[0].userType()==Exception::metaTypeId();
 }
 
-static QVariant catchFunc(const QList<QVariant>&lf)
+static QVariant catchFunc(const QList<QVariant>&lf,Engine&)
 {
 	if(lf.size()<1||lf.size()>3)
 		return Exception(Exception::ArgumentListError, "expecting 1-3 arguments");
