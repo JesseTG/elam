@@ -112,7 +112,7 @@ static QPair<QString,QVariant> strLiteralParser(const QString&expr,Engine&engine
 	return QPair<QString,QVariant>(ls,r);
 }
 
-static QVariant strFunc(const QList<QVariant>&lf)
+static QVariant strFunc(const QList<QVariant>&lf,Engine&)
 {
 	if(lf.size()!=1)
 		return Exception(Exception::ArgumentListError, "expecting exactly one argument");
@@ -121,7 +121,7 @@ static QVariant strFunc(const QList<QVariant>&lf)
 	return lf[0].toString();
 }
 
-static QVariant strlenFunc(const QList<QVariant>&lf)
+static QVariant strlenFunc(const QList<QVariant>&lf,Engine&)
 {
 	if(lf.size()!=1)
 		return Exception(Exception::ArgumentListError, "expecting exactly one argument");
@@ -130,7 +130,7 @@ static QVariant strlenFunc(const QList<QVariant>&lf)
 	return (qlonglong)lf[0].toString().size();
 }
 
-static QVariant concatFunc(const QList<QVariant>&lf)
+static QVariant concatFunc(const QList<QVariant>&lf,Engine&)
 {
 	QString ret;
 	for(int i=0;i<lf.size();i++)
@@ -138,7 +138,7 @@ static QVariant concatFunc(const QList<QVariant>&lf)
 	return ret;
 }
 //additive
-static QVariant strAdd(const QVariant&o1,const QVariant&o2)
+static QVariant strAdd(const QVariant&o1,const QVariant&o2,Engine&)
 {
 	return o1.toString()+o2.toString();
 }
@@ -148,7 +148,7 @@ int StringEngine::stringParserPrio()
 	return 50;
 }
 
-static QVariant strCast(const QVariant&v){return v.toString();}
+static QVariant strCast(const QVariant&v,const Engine&){return v.toString();}
 
 void StringEngine::configureStringEngine(Engine& eng)
 {

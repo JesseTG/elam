@@ -35,7 +35,7 @@ static QPair<QString,QVariant> IntLiteralParser(const QString&expr,Engine&engine
 	else return QPair<QString,QVariant>();
 }
 
-static QVariant intFunc(const QList<QVariant>&lf)
+static QVariant intFunc(const QList<QVariant>&lf,Engine&)
 {
 	if(lf.size()!=1)
 		return Exception(Exception::ArgumentListError, "expecting exactly one argument");
@@ -45,38 +45,38 @@ static QVariant intFunc(const QList<QVariant>&lf)
 }
 
 //unary
-static QVariant intPlus(const QVariant&o)
+static QVariant intPlus(const QVariant&o,Engine&)
 {
 	return o;
 }
-static QVariant intMinus(const QVariant&o)
+static QVariant intMinus(const QVariant&o,Engine&)
 {
 	return -o.toLongLong();
 }
 
 //additive
-static QVariant intAdd(const QVariant&o1,const QVariant&o2)
+static QVariant intAdd(const QVariant&o1,const QVariant&o2,Engine&)
 {
 	return o1.toLongLong()+o2.toLongLong();
 }
-static QVariant intMinus(const QVariant&o1,const QVariant&o2)
+static QVariant intMinus(const QVariant&o1,const QVariant&o2,Engine&)
 {
 	return o1.toLongLong()-o2.toLongLong();
 }
 
 //multiplicative
-static QVariant intMult(const QVariant&o1,const QVariant&o2)
+static QVariant intMult(const QVariant&o1,const QVariant&o2,Engine&)
 {
 	return o1.toLongLong()*o2.toLongLong();
 }
-static QVariant intDiv(const QVariant&o1,const QVariant&o2)
+static QVariant intDiv(const QVariant&o1,const QVariant&o2,Engine&)
 {
 	qlonglong l2=o2.toLongLong();
 	if(l2==0)
 		return Exception(Exception::OperationError,"division by zero");
 	return o1.toLongLong()/l2;
 }
-static QVariant intMod(const QVariant&o1,const QVariant&o2)
+static QVariant intMod(const QVariant&o1,const QVariant&o2,Engine&)
 {
 	qlonglong l2=o2.toLongLong();
 	if(l2==0)
@@ -85,19 +85,19 @@ static QVariant intMod(const QVariant&o1,const QVariant&o2)
 }
 
 //bitwise
-static QVariant intAnd(const QVariant&o1,const QVariant&o2)
+static QVariant intAnd(const QVariant&o1,const QVariant&o2,Engine&)
 {
 	return o1.toLongLong()&o2.toLongLong();
 }
-static QVariant intOr(const QVariant&o1,const QVariant&o2)
+static QVariant intOr(const QVariant&o1,const QVariant&o2,Engine&)
 {
 	return o1.toLongLong()|o2.toLongLong();
 }
-static QVariant intXor(const QVariant&o1,const QVariant&o2)
+static QVariant intXor(const QVariant&o1,const QVariant&o2,Engine&)
 {
 	return o1.toLongLong()^o2.toLongLong();
 }
-static QVariant intNot(const QVariant&o)
+static QVariant intNot(const QVariant&o,Engine&)
 {
 	return ~o.toLongLong();
 }
@@ -108,7 +108,7 @@ int IntEngine::intParserPrio()
 	return 20;
 }
 
-static QVariant intCast(const QVariant&v){return v.toLongLong();}
+static QVariant intCast(const QVariant&v,const Engine&){return v.toLongLong();}
 
 void IntEngine::configureIntEngine(ELAM::Engine& eng)
 {

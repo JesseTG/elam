@@ -13,11 +13,13 @@
 #include "dptr.h"
 
 namespace ELAM {
+class Engine;
 
 /** \brief pointer to a function wrapping an unary operator
 \param op the operand to be worked on
+\param engine the engine calling the operator
 \returns the result of the operation*/
-typedef QVariant (*UnaryOperatorCall)(const QVariant&op);
+typedef QVariant (*UnaryOperatorCall)(const QVariant&op,Engine&engine);
 
 /** \brief Wraps a particular unary operator.
 
@@ -66,7 +68,7 @@ class UnaryOperator
 		QList<int> getTypeIds()const;
 		
 		///calls the callback function associated with the type of the argument, throws an exception if there is no callback
-		QVariant execute(const QVariant&)const;
+		QVariant execute(const QVariant&,Engine&)const;
 		
 		///true if this operator has no callbacks
 		bool isNull()const;

@@ -42,17 +42,17 @@ UnaryOperator::~UnaryOperator()
 }
 
 
-QVariant UnaryOperator::execute(const QVariant& op) const
+QVariant UnaryOperator::execute(const QVariant& op,Engine&eng) const
 {
 	if(d->callmap.size()==0)
 		return Exception(Exception::UnknownOperatorError);
 	//search for direct match
 	if(d->callmap.contains(op.userType()))
-		return d->callmap[op.userType()](op);
+		return d->callmap[op.userType()](op,eng);
 	//search for fallback
 	int any=AnyType::metaTypeId();
 	if(d->callmap.contains(any))
-		return d->callmap[any](op);
+		return d->callmap[any](op,eng);
 	return Exception(Exception::TypeMismatchError);
 }
 

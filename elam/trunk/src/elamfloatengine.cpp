@@ -66,27 +66,27 @@ static QPair<QString,QVariant> floatLiteralParser2(const QString&expr,Engine&eng
 	else return QPair<QString,QVariant>();
 }
 
-static QVariant floatAdd(const QVariant &o1,const QVariant &o2)
+static QVariant floatAdd(const QVariant &o1,const QVariant &o2,Engine&)
 {
 	return o1.toDouble()+o2.toDouble();
 }
-static QVariant floatPlus(const QVariant &o)
+static QVariant floatPlus(const QVariant &o,Engine&)
 {
 	return o;
 }
-static QVariant floatMinus(const QVariant &o)
+static QVariant floatMinus(const QVariant &o,Engine&)
 {
 	return -o.toDouble();
 }
-static QVariant floatMinus(const QVariant &o1,const QVariant &o2)
+static QVariant floatMinus(const QVariant &o1,const QVariant &o2,Engine&)
 {
 	return o1.toDouble()-o2.toDouble();
 }
-static QVariant floatMult(const QVariant &o1,const QVariant &o2)
+static QVariant floatMult(const QVariant &o1,const QVariant &o2,Engine&)
 {
 	return o1.toDouble()*o2.toDouble();
 }
-static QVariant floatDiv(const QVariant &o1,const QVariant &o2)
+static QVariant floatDiv(const QVariant &o1,const QVariant &o2,Engine&)
 {
 	double d2=o2.toDouble();
 	if(d2==0.0)
@@ -94,7 +94,7 @@ static QVariant floatDiv(const QVariant &o1,const QVariant &o2)
 	return o1.toDouble()/d2;
 }
 
-static QVariant floatFunc(const QList<QVariant>&lf)
+static QVariant floatFunc(const QList<QVariant>&lf,Engine&)
 {
 	if(lf.size()!=1)
 		return Exception(Exception::ArgumentListError, "expecting exactly one argument");
@@ -112,7 +112,7 @@ int FloatEngine::floatLowParserPrio()
 	return 10;
 }
 
-static QVariant fltCast(const QVariant&v){return v.toDouble();}
+static QVariant fltCast(const QVariant&v,const Engine&){return v.toDouble();}
 
 void FloatEngine::configureFloatEngine(ELAM::Engine& eng)
 {

@@ -38,11 +38,11 @@ void ElamTest::evaltest()
 	
 }
 
-static QVariant mycount(const QList<QVariant>&args)
+static QVariant mycount(const QList<QVariant>&args,Engine&)
 {
 	return (qlonglong)args.size();
 }
-static QVariant mysum(const QList<QVariant>&args)
+static QVariant mysum(const QList<QVariant>&args,Engine&)
 {
 	qlonglong r=0;
 	for(int i=0;i<args.size();i++)
