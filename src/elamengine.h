@@ -15,7 +15,7 @@
 #include "elambinary.h"
 #include "elamcharclass.h"
 
-#include "dptr.h"
+#include "../dptr/dptr_base.h"
 
 namespace ELAM {
 

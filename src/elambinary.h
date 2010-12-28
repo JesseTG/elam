@@ -10,7 +10,7 @@
 #include <QObject>
 #include <QVariant>
 
-#include "dptr.h"
+#include "../dptr/dptr_base.h"
 
 namespace ELAM {
 class Engine;
