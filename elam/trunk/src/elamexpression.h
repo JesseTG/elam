@@ -7,7 +7,7 @@
 #define ELAM_EXPRESSION_H
 
 #include "elamvalue.h"
-#include "dptr.h"
+#include "../dptr/dptr_base.h"
 
 namespace ELAM {
 

@@ -7,6 +7,7 @@
 #include "elamvalue.h"
 
 #include <QDebug>
+#include "../dptr/dptr_shared.h"
 
 namespace ELAM {
 /////////////////////////////////////////////////////////////////

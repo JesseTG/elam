@@ -9,7 +9,6 @@ RCC_DIR = .ctmp
 
 
 HEADERS += \
-	dptr.h \
 	elam.h \
 	elamunary.h \
 	elambinary.h \

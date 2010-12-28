@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QPointer>
 #include "elamengine.h"
+#include "../dptr/dptr_shared.h"
 
 namespace ELAM {
 

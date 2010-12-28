@@ -12,7 +12,7 @@
 
 #include "elamexpression.h"
 
-#include "dptr.h"
+#include "../dptr/dptr_base.h"
 
 namespace ELAM {
 
