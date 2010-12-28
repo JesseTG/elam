@@ -230,7 +230,7 @@ engine.registerType(QMetaType::type("MyNewType"));
 If your type can be cast from other frequently used types it is advisable to register an auto-cast for those types:
 <pre>
 <i>//The cast function...</i>
-static QVariant myNewTypeCast(const QVariant&amp;orig)
+static QVariant myNewTypeCast(const QVariant&amp;orig,const Engine&amp;)
 {
   <i>//The type of the original and our reaction to it</i>
   switch(orig.type()){
@@ -261,13 +261,15 @@ engine.setAutoCast(
 </pre>
 <p>
 
-Any time that ELAM tries to feed a value into an operator, an assignment, or a function it checks its internal database of registered types and casts. If the type of the value is a primary type then it is left along, regardless of any existing casts. If the type is not primary, then the registered auto casts are searched and the one with the highest priority for this source type is executed. Casts are never chained - each time only one cast is executed, if it does not yield a usable type for the function or operator, then an exception is generated.
+Any time that ELAM tries to feed a value into an operator, an assignment, or a function it checks its internal database of registered types and casts. If the type of the value is a primary type then it is left along, regardless of any existing casts. If the type is not primary, then the registered auto casts are searched and the one with the highest priority for this source type is executed. Casts are never chained - each time only one cast is executed, if it does not yield a usable type for the function or operator, then an exception is generated.<p>
+
+The <tt>const&nbsp;Engine&amp;</tt> parameter to the cast function can be used to retrieve context information about the engine that is calling the cast function - you will normally not need it.
 
 <h2>Creating new Functions</h2>
 
 Functions can execute any operation on any amount of arguments. Only one function with the same name can exist at any time in an engine. The function is handed any arguments that exist when it is called, the implementation of the function has to check itself whether those arguments are correct. A very trivial example is this:
 <pre>
-static QVariant myFunction(const QList&lt;QVariant>&amp;args)
+static QVariant myFunction(const QList&lt;QVariant>&amp;args,Engine&amp;)
 {
   return args.size();
 }
@@ -279,7 +281,7 @@ The example above implements a function that returns the number of arguments tha
 
 More complex functions have to check for types and the number of arguments, for example converting the type defined above into a string could be done like this:
 <pre>
-static QVariant myNewTypeToString(const QList&lt;QVariant>&amp;args)
+static QVariant myNewTypeToString(const QList&lt;QVariant>&amp;args,Engine&amp;)
 {
   if(args.size()!=1)
     return ELAM::Exception(ELAM::Exception::ArgumentListError,"Expected one argument.");
@@ -289,7 +291,9 @@ static QVariant myNewTypeToString(const QList&lt;QVariant>&amp;args)
 }
 ...
 engine.setFunction("mytype2string",myNewTypeToString);
-</pre>
+</pre><p>
+
+You can use the additional <tt>Engine&amp;</tt> parameter to retrieve status information about the engine or to change its state (for example if your function is supposed to elevate a variable to a constant). It is not recommended to delete functions, variables, or constants, since this can have effects on the remainder of the expression - expressions are compiles just once (determining which token is a function and which is a variable or constant) and then they are executed, so if a token changes status from function to variable (or vice versa) the effects can be surprising.
 
 <h2>Creating new Literals</h2>
 
@@ -351,7 +355,7 @@ The ELAM::UnaryOperator and ELAM::BinaryOperator classes are used internally to 
 Let's define the unary "*" operator (as the square of its argument) for ELAM::IntEngine, this means we have to get the operator instance for this operator from the engine and add a handler for qlonglong (which is used as generic integer by the library):
 
 <pre>
-static QVariant mySquareOperator(const QVariant&amp;op)
+static QVariant mySquareOperator(const QVariant&amp;op,Engine&amp;)
 {
   qlonglong value=op.toLongLong();
   return value*value;
@@ -371,7 +375,7 @@ The last line tests the operator - it multiplies 2 with the square of 3 (9), the
 Binary operators are slightly more complex: they have a precedence and two arguments instead of one.
 
 <pre>
-static QVariant myDivOperator(const QVariant&amp;op1,const QVariant&amp;op2)
+static QVariant myDivOperator(const QVariant&amp;op1,const QVariant&amp;op2,Engine&amp;)
 {
   return op1.toDouble()/op2.toDouble();
 }
@@ -389,6 +393,8 @@ The function above is again trivial - it converts both arguments to qreal and th
 
 The priority that is given here registers the operator at the same level as all other multiplicative operators in the default library. Normally if an operator already exists the priority remains unchanged - regardless of whether it matches or not. This behavior can be changed with the optional third argument to this method.<p>
 
-The last line should return a QVariant representing the qreal 0.6666666...
+The last line should return a QVariant representing the qreal 0.6666666...<p>
+
+In both cases (unary and binary operators) the <tt>Engine&amp;</tt> parameter can be used to determine context information from the engine that is calling the operator. It is not recommended (although possible) to change the state of the engine, since this is usually not expected by the user.
 
 </html>
