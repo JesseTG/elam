@@ -397,4 +397,65 @@ The last line should return a QVariant representing the qreal 0.6666666...<p>
 
 In both cases (unary and binary operators) the <tt>Engine&amp;</tt> parameter can be used to determine context information from the engine that is calling the operator. It is not recommended (although possible) to change the state of the engine, since this is usually not expected by the user.
 
+<h2>Redirecting Variables and Constants</h2>
+
+Sometimes it is desirable to retrieve variables and/or constants from the context the engine is running in instead of copying the values into the engine, executing an expression, then copying them back.<p>
+
+For this you need to derive from ELAM::Engine and provide your own methods for accessing variables and constants:
+<pre>
+class MyEngine:public ELAM::Engine
+{
+  QString myvar;
+  public:
+    bool hasVariable(QString name)const
+    {
+      if(name=="myvar")return true;
+      else return ELAM::Engine::hasVariable(name);
+    }
+
+    QStringList variableNames()const;
+    {
+      QStringList ret=ELAM::Engine::variableNames();
+      ret.append("myvar");
+      return ret;
+    }
+
+    QVariant getVariable(QString name)const
+    {
+      if(name=="myvar")return myvar;
+      else return ELAM::Engine::getVariable(name);
+    }
+
+    bool setVariable(QString name,QVariant value)
+    {
+      if(name=="myvar"){
+        myvar=value.toString();
+        return true;
+      }else
+        return ELAM::Engine::setVariable(name,value);
+    }
+
+    void removeVariable(QString name)
+    {
+      if(name=="myvar") //ignore the request
+        return;
+      else
+        ELAM::Engine::removeVariable(name);
+    }
+};
+</pre>
+
+For each of variables and constants there are those four methods that are used by other parts of ELAM to access them. If you extend one of the five, you have to adjust all five of them.<p>
+
+Normally you will redirect only the variables/constants that you explicitly know and let the base class handle the remaining ones. The example here deliberately uses a very simplistic approach to show the principle - normally you will have to query the environment of the engine to get better results.<p>
+
+If you override variable handling you need to be aware of the fact that users can assign any value to any variable at run-time. If this is not true for some of your variables you have to do explicit type checking on the value that you are handed.<p>
+
+If you override constant handling you need to be aware that, while users cannot override constants, the default library uses some constants (boolean literals, floating point constants, etc.).<p>
+
+The has* method should check the new environment first and if it does not find anything refer to its base class implementation, it should not return "false" by itself. The *Names function should add the names of variables/constants in its new environment to the list supplied by the base class, so that queries have a complete overview over existing variabes and constants.<p>
+
+The get* method should first inspect its environment for a match - if the match is found it should return the value, otherwise it should refer to the base class. The same is true for the set* method. Additionally the set* method may return false if it finds a type mismatch that it cannot resolve (use QVariants canConvert and value template methods for conversions).<p>
+
+Overriding the remove* method is not necessary if you do not have remove logic for your own variables/constants - the base implementation will ignore remove requests for unknown values.
 </html>
