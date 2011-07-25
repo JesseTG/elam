@@ -102,6 +102,31 @@ static QVariant intNot(const QVariant&o,Engine&)
 	return ~o.toLongLong();
 }
 
+static QVariant intLt(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toLongLong()<o2.toLongLong();
+}
+static QVariant intGt(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toLongLong()>o2.toLongLong();
+}
+static QVariant intLe(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toLongLong()<=o2.toLongLong();
+}
+static QVariant intGe(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toLongLong()>=o2.toLongLong();
+}
+static QVariant intEq(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toLongLong()==o2.toLongLong();
+}
+static QVariant intNe(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toLongLong()!=o2.toLongLong();
+}
+
 
 int IntEngine::intParserPrio()
 {
@@ -123,6 +148,12 @@ void IntEngine::configureIntEngine(ELAM::Engine& eng)
 	eng.unaryOperator("+").setCallback(intPlus,iid);
 	eng.unaryOperator("~").setCallback(intNot,iid);
 	//binaries
+        eng.binaryOperator("==",60).setCallback(intEq,iid,iid);
+        eng.binaryOperator("!=",60).setCallback(intNe,iid,iid);
+        eng.binaryOperator("<=",60).setCallback(intLe,iid,iid);
+        eng.binaryOperator(">=",60).setCallback(intGe,iid,iid);
+        eng.binaryOperator("<",60).setCallback(intLt,iid,iid);
+        eng.binaryOperator(">",60).setCallback(intGt,iid,iid);
 	eng.binaryOperator("-",80).setCallback(intMinus,iid,iid);
 	eng.binaryOperator("+",80).setCallback(intAdd,iid,iid);
 	eng.binaryOperator("*",90).setCallback(intMult,iid,iid);

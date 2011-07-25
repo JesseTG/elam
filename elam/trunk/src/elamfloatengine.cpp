@@ -94,6 +94,32 @@ static QVariant floatDiv(const QVariant &o1,const QVariant &o2,Engine&)
 	return o1.toDouble()/d2;
 }
 
+static QVariant fltLt(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toDouble()<o2.toDouble();
+}
+static QVariant fltGt(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toDouble()>o2.toDouble();
+}
+static QVariant fltLe(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toDouble()<=o2.toDouble();
+}
+static QVariant fltGe(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toDouble()>=o2.toDouble();
+}
+static QVariant fltEq(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toDouble()==o2.toDouble();
+}
+static QVariant fltNe(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toDouble()!=o2.toDouble();
+}
+
+
 static QVariant floatFunc(const QList<QVariant>&lf,Engine&)
 {
 	if(lf.size()!=1)
@@ -125,6 +151,24 @@ void FloatEngine::configureFloatEngine(ELAM::Engine& eng)
 	eng.unaryOperator("-").setCallback(floatMinus,fid);
 	eng.unaryOperator("+").setCallback(floatPlus,fid);
 	//binary
+        eng.binaryOperator("==",60).setCallback(fltEq,fid,fid);
+        eng.binaryOperator("==").setCallback(fltEq,fid,iid);
+        eng.binaryOperator("==").setCallback(fltEq,iid,fid);
+        eng.binaryOperator("!=",60).setCallback(fltNe,fid,fid);
+        eng.binaryOperator("!=").setCallback(fltNe,iid,fid);
+        eng.binaryOperator("!=").setCallback(fltNe,fid,iid);
+        eng.binaryOperator("<=",60).setCallback(fltLe,fid,fid);
+        eng.binaryOperator("<=").setCallback(fltLe,fid,iid);
+        eng.binaryOperator("<=").setCallback(fltLe,iid,fid);
+        eng.binaryOperator(">=",60).setCallback(fltGe,fid,fid);
+        eng.binaryOperator(">=").setCallback(fltGe,iid,fid);
+        eng.binaryOperator(">=").setCallback(fltGe,fid,iid);
+        eng.binaryOperator("<",60).setCallback(fltLt,fid,fid);
+        eng.binaryOperator("<").setCallback(fltLt,iid,fid);
+        eng.binaryOperator("<").setCallback(fltLt,fid,iid);
+        eng.binaryOperator(">",60).setCallback(fltGt,fid,fid);
+        eng.binaryOperator(">").setCallback(fltGt,iid,fid);
+        eng.binaryOperator(">").setCallback(fltGt,fid,iid);
 	eng.binaryOperator("-",80).setCallback(floatMinus,fid,fid);
 	eng.binaryOperator("-").setCallback(floatMinus,iid,fid);
 	eng.binaryOperator("-").setCallback(floatMinus,fid,iid);

@@ -143,6 +143,17 @@ static QVariant strAdd(const QVariant&o1,const QVariant&o2,Engine&)
 	return o1.toString()+o2.toString();
 }
 
+//compare
+static QVariant strEq(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toString()==o2.toString();
+}
+static QVariant strNe(const QVariant&o1,const QVariant&o2,Engine&)
+{
+        return o1.toString()!=o2.toString();
+}
+
+
 int StringEngine::stringParserPrio()
 {
 	return 50;
@@ -163,7 +174,13 @@ void StringEngine::configureStringEngine(Engine& eng)
 	eng.setFunction("strlen",strlenFunc);
 	eng.setFunction("concat",concatFunc);
 	//operators
+        eng.binaryOperator("==",60).setCallback(strEq,sid,sid);
+        eng.binaryOperator("==").setCallback(strEq,aid,sid);
+        eng.binaryOperator("==").setCallback(strEq,sid,aid);
+        eng.binaryOperator("!=",60).setCallback(strNe,sid,sid);
+        eng.binaryOperator("!=").setCallback(strNe,sid,aid);
+        eng.binaryOperator("!=").setCallback(strNe,aid,sid);
 	eng.binaryOperator("+",80).setCallback(strAdd,sid,sid);
-	eng.binaryOperator("+",80).setCallback(strAdd,aid,sid);
-	eng.binaryOperator("+",80).setCallback(strAdd,sid,aid);
+	eng.binaryOperator("+").setCallback(strAdd,aid,sid);
+	eng.binaryOperator("+").setCallback(strAdd,sid,aid);
 }
