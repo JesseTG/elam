@@ -47,7 +47,7 @@ Exception& Exception::operator=(const Exception& e)
 	return *this;
 }
 
-static int AnyType_metaid=qRegisterMetaType<AnyType>();
+static int AnyType_metaid=qRegisterMetaType<ELAM::AnyType>();
 int AnyType::metaTypeId()
 {
 	return AnyType_metaid;
